@@ -1,0 +1,207 @@
+{% extends 'aliyun/basic/index.html' %}
+
+{% block css %}
+    <style>
+        .layui-form-checkbox[lay-skin=primary] {
+            /* width: 100%; */
+            padding-left: 28px;
+        }
+    </style>
+{% endblock %}
+{% block tab_title %}
+    <ul class="layui-tab-title">
+          <li class="home"><i class="layui-icon">&#xe68e;</i>访问控制 RAM</li>
+    </ul>
+{% endblock %}
+{% block conent %}
+    <div class="x-body layui-anim layui-anim-up" style="overflow-y:scroll;min-height:990px;">
+    <label for="prov">账号</label>
+    <select  name="suppUserId" id="suppUserId" style="width: 20%" class="allAct">
+        <option id="-1" >请选择</option>
+    </select>
+    <button id="find_act" class="layui-btn layui-btn-normal" data-type="reload"><i class="layui-icon"></i>查询</button>
+
+    <table class="layui-hide" id="ALI_table_oss" lay-filter="ALI_table_oss"></table>
+
+{% endblock %}
+{% block js %}
+
+    <script type="text/html" id="titleTpl">
+        <a  class="layui-table-link">{{ d.CreateTime }}</a>
+    </script>
+
+    <script type="text/html" id="barDemo" >
+      <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+      <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+      <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+    <script src="/static/plugins/layui/layui.js" charset="utf-8"></script>
+
+    <script>
+        layui.use('table', function(){
+            TABLE = layui.table;
+
+            TABLE.render({
+                autoSort:true,
+                elem: '#ALI_table_oss',
+                id:"ALI_table_oss"
+                ,url:'{% url 'ali_oss_index' %}'
+                ,method:'post'
+                ,where: {"csrfmiddlewaretoken":"{{ csrf_token }}","suppUserId":'{{ accountName }}'}
+                ,toolbar: '#toolbarDemo'
+                ,title: '阿里云OSS资产表'
+                ,totalRow: true
+                ,height:'full-200',
+                cellMinWidth: 80
+                {#width:1400#}
+                ,defaultToolbar: ['filter', 'print', 'exports']
+                ,cols: [[
+                    {type: 'checkbox', fixed: 'left'}
+                    ,
+                    {field:'name', title:'镜像名', sort: true,totalRowText:"镜像名"},
+                    {field:'location', title:'本地区域', sort: true,totalRowText:"本地区域"},
+                    {field:'creation_date', title:'创建日期', unresize: false, sort: true,totalRowText:"创建日期"},
+                    {field:'extranet_endpoint', title:'外网访问域名', unresize: false, sort: true,totalRowText:"外网访问域名"},
+                    {field:'intranet_endpoint', title:'ECS网络访问（内网）', unresize: false, sort: true,totalRowText:"外网访问域名"},
+                    {field:'storage_class', title:'类型', unresize: false, sort: true,totalRowText:"类型"},
+            ]],
+                skin: 'row', //表格风格
+                even: true, //隔行背景
+                page: true, //是否显示分页
+                limits: [5,10,15,20,50,100,200], //显示
+                limit: 10, //每页默认显示的数量
+                request: {
+                    pageName: 'pageStart', //页码的参数名称，默认：page
+                    limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                },
+                parseData: function(res){ //res 即为原始返回的数据
+                    console.log(res.status)
+
+            }
+            });
+
+            TABLE.on('row(ALI_table_oss)', function(obj){
+                var data = obj.data;
+                console.log(data);
+                window.location.replace("{% url 'oss_info' %}?accountName="+data.accountName+"&bucketName="+
+                    data.name);
+                {#//标注选中样式#}
+                {#obj.tr.addClass('layui-table-click').siblings().removeClass('layui-table-click');#}
+              });
+
+            TABLE.on('checkbox(ALI_table_oss)', function(obj){
+            console.log(obj)
+            });
+
+            TABLE.on('tool(ALI_table_oss)', function(obj){
+                var data = obj.data;
+                if(obj.event === 'detail'){
+                    $.ajax({
+                        url: "{% url 'api_ecs_info' %}",
+                        type: "POST",
+                        data:{"uvid":data.id,"csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                           layer.open({
+                            type: 2,
+                            shade: false,
+                            area: '500px',
+                            maxmin: true,
+                            content: "{% url 'ecs_info' %}/"+data.id,
+                            zIndex: layer.zIndex, //重点1
+                            success: function(layero){
+                                layer.setTop(layero); //重点2
+                                      }
+                                    });}
+                    })
+
+                } else if(obj.event === 'del'){
+                  layer.confirm('真的删除行么', function(index){
+                    $.ajax({
+                        url: "{% url 'delete_ecs' %}",
+                        type: "POST",
+                        data:{"uvid":data.id,"csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                        if(data.state==1){
+                           //删除这一行
+                            obj.del();
+                           //关闭弹框
+                            layer.close(index);
+                            layer.msg("删除成功", {icon: 6});
+                        }else{
+                            layer.msg("删除失败", {icon: 5});
+                        }}
+                    });
+                  });
+                } else if(obj.event === 'edit'){
+                  layer.alert('编辑行：<br>'+ JSON.stringify(data))
+                }
+            })
+        });
+
+        $("#find_act").click(function () {
+            var suppUserId = $("#suppUserId").find("option:selected").text();
+            TABLE.reload("ALI_table_oss", {
+                  url: '{% url 'ali_oss_index' %}'
+                 ,method:'post'
+                  ,where: {"suppUserId":suppUserId, "csrfmiddlewaretoken":"{{ csrf_token }}"} //设定异步数据接口的额外参数
+                  //,height: 300)
+                 ,cols: [[
+                    {type: 'checkbox', fixed: 'left'},
+                    {field:'name', title:'镜像名', sort: true,totalRowText:"镜像名"},
+                    {field:'location', title:'本地区域', sort: true,totalRowText:"本地区域"},
+                    {field:'creation_date', title:'创建日期', unresize: false, sort: true,totalRowText:"创建日期"},
+                    {field:'extranet_endpoint', title:'外网访问域名', unresize: false, sort: true,totalRowText:"外网访问域名"},
+                    {field:'intranet_endpoint', title:'ECS网络访问（内网）', unresize: false, sort: true,totalRowText:"外网访问域名"},
+                    {field:'storage_class', title:'类型', unresize: false, sort: true,totalRowText:"类型"},
+            ]]
+                ,parseData: function(res){ //res 即为原始返回的数据
+                      var data_list = res.data;
+                      if(res.state != 200){
+                          data_list = '';
+                          console.log(res.state,typeof res.message)
+                          layer.msg("状态码:"+res.state+"\r\n"+res.message,{
+                              anim: 6,
+                            });
+
+                      }
+
+                      return {
+                          "code": res.code, //解析接口状态
+                          "message": res.message, //解析提示文本
+                          "count": res.count, //解析数据长度
+                          "data":data_list
+                };
+  }
+            });
+
+        });
+
+
+
+    </script>
+
+    <script>
+        $(function () {
+            $("#suppId option:gt(0)").remove();
+            var suppUserId = "{{ accountName }}";
+            /*初始化省份信息*/
+            $.post("{% url 'account_getProv' %}", {
+                "csrfmiddlewaretoken": "{{ csrf_token }}"
+            },function (data) {
+                var result = JSON.parse(data);
+                $.each(result, function (code, item) {
+                    liNode = $("<option></option>").attr("id",item.id).text(item.accountName);
+                    $("#suppUserId").append(liNode);
+                    $("#suppUserId").val(suppUserId);
+                })
+            })
+        })
+
+    </script>
+
+    <script type="text/html" id="usernameTpl">
+        <a>{{ d.UserName }}</a>
+    </script>
+{% endblock %}

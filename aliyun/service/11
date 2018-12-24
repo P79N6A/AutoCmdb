@@ -1,0 +1,64 @@
+{% if key == "ZhRegistrantOrganization" %}
+                        $tbd.append("<tr><td>域名持有者(中文):</td><td>{{ value }}</td></tr>")
+                    {% elif key == "RegistrantOrganization" %}
+                        $tbd.append("<tr><td>域名持有者(英文):</td><td>{{ value }}</td></tr>")
+                    {% elif key == "RegistrantName" %}
+                        $tbd.append("<tr><td>联系人(英文):</td><td>{{ value }}</td></tr>")
+                    {% elif key == "ZhRegistrantName" %}
+                        $tbd.append("<tr><td>联系人(中文):</td><td>{{ value }}</td></tr>")
+                    {% elif key == "Email" %}
+                        $tbd.append("<tr><td>联系人邮箱:</td><td>{{ value }}</td></tr>")
+                    {% elif key == "EmailVerificationStatus" %}
+                        {% if value == "1" %}
+                            $tbd.append("<tr><td>邮箱是否已通过验证:</td><td>验证通过</td></tr>")
+                        {% else %}
+                            $tbd.append("<tr><td>邮箱是否已通过验证:</td><td>验证未通过</td></tr>")
+                        {% endif %}
+                    {% elif key == "RegistrationDate" %}
+                        $tbd.append("<tr><td>注册日期:</td><td>{{ value }}</td></tr>")
+                    {% elif key == "ExpirationDate" %}
+                        $tbd.append("<tr><td>到期日期:</td><td>{{ value }}</td></tr>")
+                    {% elif key == "DnsList" %}
+                        $tbd.append("<tr><td>DNS服务器:</td>" +
+                            "<td>{% for dns in value.Dns %}{{ dns }},{% endfor %}</td></tr>")
+                    {% elif key == "UpdateProhibitionLock" %}
+                        {% if value == "NONE_SETTING" %}
+                            $tbd.append("<tr><td>域名安全锁状态:</td><td>未设置</td></tr>")
+                        {% elif value == "OPEN" %}
+                            $tbd.append("<tr><td>域名安全锁状态:</td><td>已开启</td></tr>")
+                        {% else %}
+                            $tbd.append("<tr><td>域名安全锁状态:</td><td>已关闭</td></tr>")
+                        {% endif %}
+                    {% elif key == "TransferProhibitionLock" %}
+                        {% if value == "NONE_SETTING" %}
+                            $tbd.append("<tr><td>域名转移锁状态:</td><td>未设置</td></tr>")
+                        {% elif value == "OPEN" %}
+                            $tbd.append("<tr><td>域名转移锁状态:</td><td>已开启</td></tr>")
+                        {% else %}
+                            $tbd.append("<tr><td>域名转移锁状态:</td><td>已关闭</td></tr>")
+                        {% endif %}
+                    {% elif key == "RealNameStatus" %}
+                        {% if value == "NONAUDIT" %}
+                            $tbd.append("<tr><td>域名实名认证状态:</td><td>未实名认证</td></tr>")
+                        {% elif value == "SUCCEED" %}
+                            $tbd.append("<tr><td>域名实名认证状态:</td><td>认证成功</td></tr>")
+                        {% elif value == "FAILED" %}
+                            $tbd.append("<tr><td>域名实名认证状态:</td><td>审核失败</td></tr>")
+                        {% else %}
+                            $tbd.append("<tr><td>域名实名认证状态:</td><td>审核中</td></tr>")
+                        {% endif %}
+                    {% endif %}
+
+  [{'permission__menu': 1, 'action__code': 'get', 'permission__url': '/index.html$', 'permission__caption': '普华运维平台首页', 'permission__menu__caption': '普华运维平台', 'permission__menu__parent': None},
+   {'permission__menu': 1, 'action__code': 'get', 'permission__url': '/aliyun/$', 'permission__caption': '阿里云', 'permission__menu__caption': '普华运维平台', 'permission__menu__parent': None},
+   {'permission__menu': 2, 'action__code': 'get', 'permission__url': '/aliyun/ecs$', 'permission__caption': '阿里云ECS', 'permission__menu__caption': '阿里云管理平台', 'permission__menu__parent': 1},
+    {'permission__menu': None, 'action__code': 'post', 'permission__url': '/aliyun/api/account/get$', 'permission__caption': '阿里云二级联动获取账号', 'permission__menu__caption': None, 'permission__menu__parent': None},
+    {'permission__menu': None, 'action__code': 'post', 'permission__url': '/aliyun/api/account/region/get$', 'permission__caption': '阿里云二级联动获取可用区', 'permission__menu__caption': None, 'permission__menu__parent': None},
+    {'permission__menu': None, 'action__code': 'post', 'permission__url': '/aliyun/api/ecs/get$', 'permission__caption': '阿里云api--获取ecs列表', 'permission__menu__caption': None, 'permission__menu__parent': None},
+    {'permission__menu': None, 'action__code': 'edit', 'permission__url': '/aliyun/api/ecs/update$', 'permission__caption': '阿里云ecs更新', 'permission__menu__caption': None, 'permission__menu__parent': None},
+    {'permission__menu': None, 'action__code': 'delete', 'permission__url': '/aliyun/api/ecs/del$', 'permission__caption': '阿里云ecs删除', 'permission__menu__caption': None, 'permission__menu__parent': None},
+    {'permission__menu': 2, 'action__code': 'get', 'permission__url': '/aliyun/domain$', 'permission__caption': '阿里云DOMAIN', 'permission__menu__caption': '阿里云管理平台', 'permission__menu__parent': 1},
+    {'permission__menu': None, 'action__code': 'get', 'permission__url': '/aliyun/api/domain/get$', 'permission__caption': '阿里云api--获取domain列表', 'permission__menu__caption': None, 'permission__menu__parent': None},
+     {'permission__menu': 1, 'action__code': 'get', 'permission__url': '/cmdb.html$', 'permission__caption': '资产', 'permission__menu__caption': '普华运维平台', 'permission__menu__parent': None},
+     {'permission__menu': 2, 'action__code': 'get', 'permission__url': '#', 'permission__caption': '阿里云RDS', 'permission__menu__caption': '阿里云管理平台', 'permission__menu__parent': 1},
+     {'permission__menu': 6, 'action__code': 'get', 'permission__url': '/aliyun/rds$', 'permission__caption': 'RDS实例列表', 'permission__menu__caption': '阿里云RDS', 'permission__menu__parent': 2}]

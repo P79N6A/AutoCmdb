@@ -1,0 +1,43 @@
+{% load rbac %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	<title>权限系统</title>
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+{#    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />#}
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <link rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.css"/>
+    <link rel="stylesheet" href="/static/plugins/font-awesome/css/font-awesome.css"/>
+
+{#    <link rel="stylesheet" href="/static/plugins/X-admin/backend.css"/>#}
+{#    <link rel="stylesheet" href="/static/plugins/X-admin/commons.css"/>#}
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/static/plugins/X-admin/css/font.css">
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css"  media="all">
+	<link rel="stylesheet" href="/static/plugins/X-admin/css/xadmin.css">
+
+    {% block css %} {% endblock %}
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script src="/static/plugins/X-admin/lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/static/plugins/X-admin/js/xadmin.js"></script>
+    <script type="text/javascript" src="/static/js/jquery-1.12.4.js"></script>
+    <script src="/static/plugins/layui/layui.js" charset="utf-8"></script>
+    {% block rbac_css %}
+    {% endblock %}
+    {% block rbac_js %}
+    {% endblock %}
+</head>
+<body>
+
+{% block rbac_body %}
+
+{% endblock %}
+
+{% block js %}{% endblock %}
+
+</body>
+</html>
+

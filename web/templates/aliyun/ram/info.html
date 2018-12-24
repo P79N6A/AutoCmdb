@@ -1,0 +1,174 @@
+{% extends 'aliyun/basic/index.html' %}
+
+{% block css %}
+    <style>
+        .layui-form-checkbox[lay-skin=primary] {
+            /* width: 100%; */
+            padding-left: 28px;
+        }
+    </style>
+{% endblock %}
+{% block tab_title %}
+          <ul class="layui-tab-title layui-tab-card">
+            <li class="layui-this">基本信息</li>
+          </ul>
+{% endblock %}
+{% block ul_title %}
+
+
+
+{% endblock %}
+
+
+
+{% block conent %}
+    <div class="layui-tab-content" style="margin-top: 30px">
+        <div class="layui-colla-item layui-tab-item layui-show" >
+                <blockquote class="layui-elem-quote layui-colla-title">
+                  基本信息
+                </blockquote>
+                <div id="basic_info" class="layui-colla-content layui-show">
+                    <table class="layui-table">
+                    <tbody>
+                        <tr>
+                            <th>用户名: <span style="font-weight: bold">{{ ram_info.User.UserName }}</span></th>
+                            <td>UID: {{ ram_info.User.UserId }}</td>
+                            <td>创建时间: {{ ram_info.User.CreateDate }}</td>
+                        </tr>
+                        <tr>
+                            <th>显示名: {{ ram_info.User.DisplayName }}</th>
+                            <td>手机: {{ ram_info.User.MobilePhone }}</td>
+                            <td>邮箱: {{ ram_info.User.Email }}</td></tr>
+                        <tr>
+                            <th>备注: {{ ram_info.User.Comments }}</th>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+             <blockquote class="layui-elem-quote layui-colla-title">
+                  用户AccessKey
+                 <button id="access_add" class="layui-btn layui-btn-xs">创建AccessKey</button>
+                </blockquote>
+                <div class="layui-colla-content layui-show">
+                    <table class="layui-table" lay-skin="line">
+                          <colgroup>
+                            <col width="150">
+                            <col width="200">
+                            <col>
+                          </colgroup>
+                          <thead>
+                              <tr>
+                                  <th>AccessKey ID</th>
+                                  <th>状态</th>
+                                  <th>创建时间</th>
+                                  <th>操作</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                            {% for i in ram_acc.AccessKeys.AccessKey %}
+                                <tr>
+                                    <td>{{ i.AccessKeyId }}</td>
+                                    {% if i.Status == "Inactive"%}
+                                        <td style="color: red">禁用</td>
+                                    {% elif i.Status == "Active" %}
+                                        <td style="color: green">启用</td>
+                                    {% else %}
+                                        <td>{{ i.Status }}</td>
+                                    {% endif %}
+                                    <td> {{ i.CreateDate }}</td>
+                                    {% if i.Status == "Inactive"%}
+                                        <td ><button class="access_set layui-btn layui-btn-sm layui-btn-normal" id="access_set">启用</button>  <button class="access_del layui-btn layui-btn-sm layui-btn-danger" id="access_del">删除</button></td>
+                                    {% elif i.Status == "Active" %}
+                                        <td ><button class="access_set layui-btn layui-btn-sm layui-btn-warm" id="access_set">禁用</button>  <button class="access_del layui-btn layui-btn-sm layui-btn-danger" id="access_del">删除</button></td>
+                                    {% else %}
+                                        <td>{{ i.Status }}</td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block js %}
+    <script>
+        $(".access_set").click(function () {
+            var Status = $(this).text();
+            var accessKeyID = $(this).parent().parent().children().first().text();
+            var UserName = "{{ UserName }}"
+            var accountName = "{{ accountName }}"
+            $.ajax({
+                        url: "{% url 'set_access_status' %}",
+                        type: "POST",
+                        data:{"accessKeyID":accessKeyID,
+                            "Status":Status,
+                            "UserName":UserName,
+                            "accountName":accountName
+                            ,"csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                        if(data.state==1){
+                            layer.msg("更改成功", {icon: 6});
+                            location.reload();
+                        }else{
+                            layer.msg(data.state, {icon: 5});
+                            location.reload();
+                        }
+                }
+
+            });
+           })
+
+        $(".access_del").click(function () {
+            var accessKeyID = $(this).parent().parent().children().first().text();
+            var UserName = "{{ UserName }}"
+            var accountName = "{{ accountName }}"
+             $.ajax({
+                        url: "{% url 'del_accesskey' %}",
+                        type: "POST",
+                        data:{"accessKeyID":accessKeyID,
+                            "UserName":UserName,
+                            "accountName":accountName
+                            ,"csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                        if(data.state==1){
+                            layer.msg("更改成功", {icon: 6});
+                            location.reload();
+                        }else{
+                            layer.msg(data.state, {icon: 5});
+                            location.reload();
+                        }
+                }
+
+            });
+
+           })
+
+        $("#access_add").click(function () {
+            var UserName = "{{ UserName }}"
+            var accountName = "{{ accountName }}"
+             $.ajax({
+                        url: "{% url 'add_accesskey' %}",
+                        type: "POST",
+                        data:{"UserName":UserName,
+                            "accountName":accountName
+                            ,"csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                        if(data.state==1){
+                            layer.msg("创建成功", {icon: 6});
+                            location.reload();
+                        }else{
+                            layer.msg(data.state, {icon: 5});
+                            location.reload();
+                        }
+                }
+
+            });
+
+           })
+    </script>
+{% endblock %}

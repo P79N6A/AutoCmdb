@@ -1,0 +1,136 @@
+{% extends 'rbac/basic/nomenu.html' %}
+
+{% block rbac_body %}
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <div>
+                <select name="p" lay-verify="required" lay-filter='role_auth' lay-search="">
+                    <option value="请选择">请选择</option>
+                    {% for p in role_auth_objs %}
+                        <option value={{ p }}>{{ p }}</option>
+                    {% endfor %}
+                </select>
+
+                <div id='ra_value' style="display: none"></div>
+            </div>
+            {% for action in actions %}
+                <input type="checkbox" lay-filter='method' title="{{ action.caption }}">
+            {% endfor %}
+            <div style="display: none" id="method_me"></div>
+
+
+            <select name="city" xm-select="selectId">
+                {% for role in roles %}
+                    <option value={{ role.caption }}>{{ role.caption }}</option>
+                {% endfor %}
+
+
+            </select>
+            <div style="display: none" id="role_me"></div>
+            <button class="layui-btn" id="role2authBtn" onclick="role2authc()">添加</button>
+
+        </div>
+    </form>
+
+    <script>
+        layui.config({
+            base: '/static/plugins/formSelects-v4/src/' //此处路径请自行处理, 可以使用绝对路径
+        }).extend({
+            formSelects: 'formSelects-v4'
+        });
+        //加载模块
+        layui.use(['jquery', 'formSelects'], function () {
+            formSelect2 = layui.formSelects;
+            formSelect2.render('selectId');
+
+            formSelect2.on('selectId', function (id, vals, choice, isAdd, isDisabled) {
+                //id:           点击select的id
+                //vals:         当前select已选中的值
+                //choice:       当前select点击的值
+                //isAdd:        当前操作选中or取消
+                //isDisabled:   当前选项是否是disabled
+                console.log(vals,choice)
+                $("#role_me").children().remove();
+                $(vals).each(function (index, element) {
+                    console.log(element["name"])
+                    $("#role_me").append("<div>" + element["name"] + "</div>");
+                })
+
+            }, true);
+
+        });
+
+
+    </script>
+    <script type="text/javascript">
+
+        layui.use('form', function () {
+                var form = layui.form;
+                form.on('select(role_auth)', function (data) {
+                    $("#ra_value").text(data.value)
+                    console.log(data.elem); //得到select原始DOM对象
+                    console.log(data.value); //得到被选中的值
+                    console.log(data.othis); //得到美化后的DOM对象
+                });
+                form.on('checkbox(method)', function (data) {
+                    if (data.elem.checked) {
+                        $("#method_me").append("<div>" + $(data.elem).attr("title") + "</div>")
+                    } else {
+                        $("#method_me input[title=" + $(data.elem).attr("title") + "]").remove()
+                    }
+                    console.log($(data.elem).attr("title"))
+                    console.log(data.elem); //得到checkbox原始DOM对象
+                    console.log(data.elem.checked); //是否被选中，true或者false
+                    console.log(data.value); //复选框value值，也可以通过data.elem.value得到
+                });
+            }
+        );
+
+        function role2authc() {
+
+            var ra_val = $("#ra_value").text()
+            var me_list = new Array()
+            var ro_list = new Array()
+            $("#method_me").children().each(function (k, v) {
+                me_list[k] = $(v).text()
+                alert(k,v)
+            });
+
+            $("#role_me").children().each(function (k, v) {
+                ro_list[k] = $(v).text()
+            });
+
+
+            if (ra_val && me_list.length > 0 && ro_list.length > 0) {
+
+                $.ajax({
+                    url: "{% url 'roleToAuthAdd' %}",
+                    type: "POST",
+                    data: {
+                        "md":"post",
+                        "ra_val": ra_val,
+                        "me_list": me_list,
+                        "ro_list": ro_list,
+                        "csrfmiddlewaretoken": "{{ csrf_token }}"
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        parent.layer.alert(data["msg"],{icon: 5})
+                    }
+                });
+            } else {
+                var layer = layui.layer;
+                parent.layer.msg('选项不能为空', function () {
+
+                });
+            }
+        }
+    </script>
+
+{% endblock %}
+
+{% block js %}
+    <link rel="stylesheet" href="/static/plugins/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="/static/plugins/formSelects-v4/dist/formSelects-v4.css"/>
+    <script src="/static/js/comm.js" charset="utf-8"></script>
+{% endblock %}

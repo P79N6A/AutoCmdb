@@ -1,0 +1,251 @@
+{% extends 'aliyun/basic/index.html' %}
+
+{% block css %}
+    <style>
+        .layui-form-checkbox[lay-skin=primary] {
+            /* width: 100%; */
+            padding-left: 28px;
+        }
+    </style>
+{% endblock %}
+{% block tab_title %}
+    <ul class="layui-tab-title">
+        <li class="home">
+            <i class="layui-icon">&#xe68e;</i>
+            专有网络-路由表
+        </li>
+        <li class="home">
+            <button class="layui-btn layui-btn-sm" onclick="window.location.reload()">
+                <i class="layui-icon">&#xe666;</i>
+            </button>
+        </li>
+
+    </ul>
+{% endblock %}
+{% block conent %}
+    <div class="x-body layui-anim layui-anim-up" style="overflow-y:scroll;min-height:990px;">
+
+    <label for="prov">账号</label>
+    <select name="suppUserId" id="suppUserId" style="width: 20%" class="allAct">
+        <option id="-1">请选择</option>
+
+    </select>
+    <label for="city">可用区</label>
+    <select id="suppId" style="width: 20%" class="allRegion">
+        <option id="-1">请选择</option>
+    </select>
+
+
+    <button id="find_act" class="layui-btn layui-btn-normal" data-type="reload"><i class="layui-icon"></i>查询</button>
+
+    <table class="layui-hide" id="ALI_table_route" lay-filter="ALI_table_route"></table>
+
+{% endblock %}
+{% block js %}
+
+    <script type="text/html" id="titleTpl">
+        <a class="layui-table-link">{{ d.CreateTime }}</a>
+    </script>
+
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+    <script src="/static/plugins/layui/layui.js" charset="utf-8"></script>
+    <script>
+        layui.use('table', function () {
+            TABLE = layui.table;
+            RegionId = $("#suppId").find("option:selected").attr("id")
+            TABLE.render({
+                autoSort: true,
+                elem: '#ALI_table_route',
+                id: "ALI_table_route"
+                , url: '{% url 'ali_vpc_route' %}'
+                , method: 'post'
+                , where: {"csrfmiddlewaretoken": "{{ csrf_token }}","suppUserId":'{{ accountName }}',"suppId":RegionId,
+                    "VpcId":'{{ VpcId }}'}
+                , toolbar: '#toolbarDemo'
+                , title: '阿里云路由表'
+                , totalRow: true
+                , height: 'full-200',
+                cellMinWidth: 80
+                {#width:1400#}
+                , defaultToolbar: ['filter', 'print', 'exports']
+                , cols: [[
+                    {type: 'checkbox', fixed: 'left'},
+                    {field: 'accountName', title: '所属账号', sort: true, totalRowText: "所属账号"},
+                    {field: 'RegionId', title: '所属区域', sort: true, totalRowText: "所属区域"},
+                    {field: 'RouteTableId', title: '实例ID', sort: true, totalRowText: "实例ID"},
+                    {field: 'RouteTableName', title: '实例名称', unresize: false, sort: true, totalRowText: "实例名称"},
+                    {field: 'VpcId', title: '所属专有网络', unresize: false, sort: true, totalRowText: "所属专有网络"},
+                    {field: 'RouterId', title: '路由器ID', unresize: false, sort: true, totalRowText: "路由器ID"},
+                    {field: 'RouteTableType', title: '路由表类型', unresize: false, sort: true, totalRowText: "路由表类型"},
+                ]],
+                skin: 'row', //表格风格
+                even: true, //隔行背景
+                page: true, //是否显示分页
+                limits: [5, 10, 15, 20, 50, 100, 200], //显示
+                limit: 30, //每页默认显示的数量
+                request: {
+                    pageName: 'pageStart', //页码的参数名称，默认：page
+                    limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+            });
+
+            TABLE.on('row(useruv)', function (obj) {
+                var data = obj.data;
+                console.log(data)
+                window.location.replace("{% url 'rds_info' %}?accountName=" + data.accountName + "&RegionId=" +
+                    data.RegionId + "&DBInstanceId=" + data.DBInstanceId);
+                {#//标注选中样式#}
+                {#obj.tr.addClass('layui-table-click').siblings().removeClass('layui-table-click');#}
+            });
+            TABLE.on('checkbox(useruv)', function (obj) {
+                console.log(obj)
+            });
+            TABLE.on('tool(useruv)', function (obj) {
+                var data = obj.data;
+                if (obj.event === 'detail') {
+                    $.ajax({
+                        url: "{% url 'api_ecs_info' %}",
+                        type: "POST",
+                        data: {"uvid": data.id, "csrfmiddlewaretoken": "{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function (data) {
+                            layer.open({
+                                type: 2,
+                                shade: false,
+                                area: '500px',
+                                maxmin: true,
+                                content: "{% url 'ecs_info' %}/" + data.id,
+                                zIndex: layer.zIndex, //重点1
+                                success: function (layero) {
+                                    layer.setTop(layero); //重点2
+                                }
+                            });
+                        }
+                    })
+                } else if (obj.event === 'del') {
+                    layer.confirm('真的删除行么', function (index) {
+                        $.ajax({
+                            url: "{% url 'delete_ecs' %}",
+                            type: "POST",
+                            data: {"uvid": data.id, "csrfmiddlewaretoken": "{{ csrf_token }}"},
+                            dataType: "json",
+                            success: function (data) {
+                                if (data.state == 1) {
+                                    //删除这一行
+                                    obj.del();
+                                    //关闭弹框
+                                    layer.close(index);
+                                    layer.msg("删除成功", {icon: 6});
+                                } else {
+                                    layer.msg("删除失败", {icon: 5});
+                                }
+                            }
+
+                        });
+                    });
+                } else if (obj.event === 'edit') {
+                    layer.alert('编辑行：<br>' + JSON.stringify(data))
+                }
+            })
+        });
+
+        $("#find_act").click(function () {
+            var suppUserId = $("#suppUserId").find("option:selected").text();
+            var suppId = $("#suppId").find("option:selected").attr("id");
+            TABLE.reload("ALI_table_route", {
+                url: '{% url 'ali_vpc_route' %}'
+                , method: 'post'
+                , where: {"suppUserId": suppUserId, "suppId": suppId, "csrfmiddlewaretoken": "{{ csrf_token }}"} //设定异步数据接口的额外参数
+                //,height: 300)
+                , cols: [[
+                    {type: 'checkbox', fixed: 'left'},
+                    {field: 'accountName', title: '所属账号', sort: true, totalRowText: "所属账号"},
+                    {field: 'RegionId', title: '所属区域', sort: true, totalRowText: "所属区域"},
+                    {field: 'RouteTableId', title: '实例ID', sort: true, totalRowText: "实例ID"},
+                    {field: 'RouteTableName', title: '实例名称', unresize: false, sort: true, totalRowText: "实例名称"},
+                    {field: 'VpcId', title: '所属专有网络', unresize: false, sort: true, totalRowText: "所属专有网络"},
+                    {field: 'RouterId', title: '路由器ID', unresize: false, sort: true, totalRowText: "路由器ID"},
+                    {field: 'RouteTableType', title: '路由表类型', unresize: false, sort: true, totalRowText: "路由表类型"},
+                ]]
+            });
+        })
+
+        $("#get_ali_ecs").click(function () {
+            var suppUserId = $("#suppUserId").find("option:selected").text();
+            var suppId = $("#suppId").find("option:selected").attr("id");
+            $.ajax({
+                type: "post",
+                url: "{% url 'ecs_list_update' %}",
+                data: {"suppUserId": suppUserId, "suppId": suppId, "csrfmiddlewaretoken": "{{ csrf_token }}"},
+                success: function (callback) {
+                    console.log(callback)
+                }
+            });
+        });
+    </script>
+
+    <script>
+         $(function () {
+            $("#suppId option:gt(0)").remove();
+            var suppUserId = "{{ accountName }}";
+
+            /*初始化省份信息*/
+            $.post("{% url 'account_getProv' %}", {
+                "csrfmiddlewaretoken": "{{ csrf_token }}"
+            },function (data) {
+                var result = JSON.parse(data);
+                $.each(result, function (code, item) {
+                    liNode = $("<option></option>").attr("id",item.id).text(item.accountName);
+
+                    $("#suppUserId").append(liNode);
+                    if (suppUserId == item.accountName){
+                        $("#suppUserId").val(suppUserId);
+                        changeSupp(this)
+                    }
+                })
+            })
+
+        });
+
+
+        $("#suppUserId").change(
+            function() {
+                $("#suppId option:gt(0)").remove();
+                var prov_code = $(this).find("option:selected").attr("id");
+                $.post("{% url 'account_getCity' %}",
+                    {"prov_selected": prov_code,
+                    "csrfmiddlewaretoken": "{{ csrf_token }}"}, function (data) {
+                    var result = JSON.parse(data);
+                    $.each(result, function (code, item) {
+                        var liNode = $("<option></option>").attr("id", item.RegionId).text(item.RegionName);
+                        $("#suppId").append(liNode);
+                    })
+                });
+            }
+        );
+
+        function changeSupp(self) {
+                var RegionId = "{{ RegionId }}";
+                $("#suppId option:gt(0)").remove();
+                var prov_code = $(self).attr("id");
+                console.log(prov_code)
+                $.post("{% url 'account_getCity' %}",
+                    {"prov_selected": prov_code,
+                    "csrfmiddlewaretoken": "{{ csrf_token }}"}, function (data) {
+                    var result = JSON.parse(data);
+                    $.each(result, function (code, item) {
+                        var liNode = $("<option></option>").attr("id", item.RegionId).text(item.RegionName);
+                        $("#suppId").append(liNode);
+                        if (RegionId){
+                             $("#suppId").val($("#"+RegionId).text())
+                        }
+                    })
+                });
+            }
+    </script>
+
+{% endblock %}

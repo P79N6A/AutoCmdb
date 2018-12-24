@@ -1,0 +1,43 @@
+{% extends "rbac/basic/index.html" %}
+{% block rbac_body %}
+    <div>
+        <div class="layui-input-inline">
+        <label class="layui-form-label">角色名</label>
+            <div class="layui-input-inline">
+            <input  id="role_caption" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-input-inline">
+        <label class="layui-form-label">角色功能描述</label>
+            <div class="layui-input-inline">
+                <textarea id="role_note" placeholder="请输入内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <div>
+            <button onclick="saveRole()">保存</button>
+        </div>
+     </div>
+    
+    <script>
+        function saveRole() {
+            var caption = $("#role_caption").val();
+            var note = $("#role_note").val();
+            $.ajax({
+                        url: "{% url 'roleAdd' %}",
+                        type: "POST",
+                        data:{
+                            "caption":caption,
+                            "note":note,
+                            "csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                            console.log(data)
+                            layer.msg(data["msg"],{icon:1,time:1000});
+                        }
+              });
+        }
+
+
+    </script>
+{% endblock %}

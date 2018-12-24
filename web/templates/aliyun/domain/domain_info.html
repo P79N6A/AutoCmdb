@@ -1,0 +1,118 @@
+{% extends 'aliyun/basic/index.html' %}
+
+{% block css %}
+    <style>
+        .layui-form-checkbox[lay-skin=primary] {
+            /* width: 100%; */
+            padding-left: 28px;
+        }
+    </style>
+{% endblock %}
+
+{% block conent %}
+    <!DOCTYPE html>
+    <html>
+    <head>
+         <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    </head>
+    <body>
+    <div class="x-body layui-anim layui-anim-up" >
+        <blockquote class="layui-elem-quote"><a href="{% url "get_domain_view" %}">域名管理</a>/{{ domainName }}</blockquote>
+        <fieldset class="layui-elem-field">
+            <legend>域名信息</legend>
+
+            <div class="layui-field-box">
+                <table class="layui-table" id="domain_tb">
+                    <tbody>
+                        <tr id="ZhRegistrantOrganization">
+                            <td id="ZhRegistrantOrganization-key">域名持有者(中文):</td>
+                            <td id="ZhRegistrantOrganization-value"></td>
+                        </tr>
+                        <tr id="RegistrantOrganization">
+                            <td id="RegistrantOrganization-key">域名持有者(英文):</td>
+                            <td id="RegistrantOrganization-value"></td>
+                        </tr>
+                        <tr id="EmailVerificationStatus">
+                            <td id="EmailVerificationStatus-key">联系人邮箱:</td>
+                            {% for k,v in result.items %}
+                            {% if k == "Email" %}
+                            <td id="EmailVerificationStatus-value">{{ v }}</td>
+                            {% endif %}
+                            {% endfor %}
+                        </tr>
+                        <tr id="RealNameStatus">
+                            <td id="RealNameStatus-key">域名实名认证状态:</td>
+                            <td id="RealNameStatus-value"></td>
+                        </tr>
+                        <tr id="RegistrationDate">
+                            <td id="RegistrationDate-key">注册日期:</td>
+                            <td id="RegistrationDate-value"></td>
+                        </tr>
+                        <tr id="ExpirationDate">
+                            <td id="ExpirationDate-key">到期日期:</td>
+                            <td id="ExpirationDate-value"></td>
+                        </tr>
+                        <tr id="1">
+                            <td id="1">域名状态：</td>
+                            <td id="domain-state-value"></td>
+                        </tr>
+                        <tr id="DnsList">
+                            <td id="DnsList-key">DNS服务器:</td>
+                            <td id="DnsList-value"></td>
+                        </tr>
+                        <tr id="UpdateProhibitionLock">
+                            <td id="UpdateProhibitionLock-key">域名安全锁状态:</td>
+                            <td id="UpdateProhibitionLock-value"></td>
+                        </tr>
+                        <tr id="ZhRegistrantName">
+                            <td id="ZhRegistrantName-key">联系人(中文):</td>
+                            <td id="ZhRegistrantName-value"></td>
+                        </tr>
+                        <tr id="RegistrantName">
+                            <td id="RegistrantName-key">联系人(英文):</td>
+                            <td id="RegistrantName-value"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </fieldset>
+
+    </div></body>
+    </html>
+
+
+{% endblock %}
+{% block js %}
+    <script>
+        $(function () {
+            var $tb = $("#domain_tb")
+            var $tbd = $tb.find("tbody")
+                {% for key,value in result.items %}
+
+                    {% if key == "RealNameStatus" %}
+                        $tbd.find("#{{ key }}-value").append("{% if value == "NONAUDIT" %} 未实名认证{% elif value == "SUCCEED" %}认证成功{% elif value == "FAILED" %}审核失败{% else %}审核中{% endif %}")
+                    {% elif key == "DomainName" %}
+                        $tbd.find("#domain-state-value").append("<a href='https://whois.aliyun.com/whois/domain/{{ value }}?file={{ value }}'>查看 whois</a>")
+                    {% elif key == "UpdateProhibitionLock" %}
+                        $tbd.find("#{{ key }}-value").append("{% if value == "NONE_SETTING" %}未设置{% elif value == "OPEN" %}已开启{% else %}已关闭{% endif %}")
+                    {% elif key == "EmailVerificationStatus" %}
+                        $tbd.find("#{{ key }}-value").append("{% if value %}  【验证通过】{% else %}  【验证未通过】{% endif %}")
+                    {% elif key == "DnsList" %}
+                        $tbd.find("#{{ key }}-value").append("{% for dns in value.Dns %}| {{ dns }}   {% endfor %}|")
+                    {% else %}
+                        $tbd.find("#{{ key }}-value").append("{{ value }}")
+
+                    {% endif %}
+
+                {% endfor %}
+            /*$("#domain_tb").find("tr").each(function(){
+                var tdArr = $(this).append();
+
+            });*/
+        })
+    </script>
+{% endblock %}
+ <th></th>
+
+

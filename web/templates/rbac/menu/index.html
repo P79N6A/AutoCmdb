@@ -1,0 +1,133 @@
+{% extends 'rbac/basic/index.html' %}
+{% block rbac_js %}
+    <link rel="stylesheet" href="/static/plugins/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="/static/plugins/formSelects-v4/dist/formSelects-v4.css"/>
+
+
+{% endblock %}
+{% block rbac_body %}
+ <table class="layui-table layui-form">
+        <thead>
+          <tr>
+            <th width="20">
+              <div class="layui-unselect header layui-form-checkbox" lay-skin="primary"><i class="layui-icon">&#xe605;</i></div>
+            </th>
+            <th width="70">ID</th>
+            <th>菜单名</th>
+            <th width="150">菜单级别</th>
+{#            <th width="50">状态</th>#}
+            <th width="300">操作</th>
+          </tr>
+        </thead>
+ <tbody class="x-cate">
+{% for i in all_menu %}
+    {% if i.parent__caption == None %}
+        <tr cate-id='{{ i.id}}' fid='{{ i.level }}' >
+            <td>
+              <div class="layui-unselect layui-form-checkbox" lay-skin="primary" data-id='2'><i class="layui-icon">&#xe605;</i></div>
+            </td>
+            <td>{{ i.id }}</td>
+            <td>
+              <i class="layui-icon x-show" status='true'>&#xe623;</i>
+              {{ i.caption }}
+            </td>
+            <td><input type="text" class="layui-input x-sort" name="order" value="{{ i.level }}"></td>
+{#            <td>#}
+{#              <input type="checkbox" name="switch"  lay-text="开启|停用"  checked="" lay-skin="switch">#}
+{#            </td>#}
+            <td class="td-manage">
+              <button class="layui-btn layui-btn layui-btn-xs"  onclick="x_admin_show('编辑','{% url 'menuEdit' %}?parent_id={{ i.id }}',w='500',h='350')" ><i class="layui-icon">&#xe642;</i>编辑</button>
+              <button class="layui-btn layui-btn-warm layui-btn-xs"  onclick="x_admin_show('添加子菜单','{% url 'menuAdd' %}?level={{ i.level }}&parent_id={{ i.id }}',w='500',h='350')" ><i class="layui-icon">&#xe642;</i>添加子菜单</button>
+              <button class="layui-btn-danger layui-btn layui-btn-xs"  onclick="member_del(this,'要删除的id')" href="javascript:;" ><i class="layui-icon">&#xe640;</i>删除</button>
+            </td>
+          </tr>
+        {%for j in all_menu%}
+            {% if j.parent__caption == i.caption %}
+                <tr cate-id='{{ j.id }}' fid='{{ i.id }}' >
+                    <td>
+                      <div class="layui-unselect layui-form-checkbox" lay-skin="primary" data-id='2'><i class="layui-icon">&#xe605;</i></div>
+                    </td>
+                    <td>{{ j.id}}</td>
+                    <td>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                      <i class="layui-icon x-show" status='true'>&#xe623;</i>
+                      {{ j.caption }}
+                    </td>
+                    <td><input type="text" class="layui-input x-sort" name="order" value="{{ j.level }}"></td>
+                    <td class="td-manage">
+                      <button class="layui-btn layui-btn layui-btn-xs"  onclick="x_admin_show('编辑','{% url 'menuEdit' %}?level={{ j.level }}&parent_id={{ j.id }}',w='500',h='350')" ><i class="layui-icon">&#xe642;</i>编辑</button>
+                      <button class="layui-btn layui-btn-warm layui-btn-xs"  onclick="x_admin_show('编辑','{% url 'menuAdd' %}?level={{ j.level }}&parent_id={{ j.id }}',w='500',h='350')" ><i class="layui-icon">&#xe642;</i>添加子菜单</button>
+                      <button class="layui-btn-danger layui-btn layui-btn-xs"  onclick="member_del(this,'要删除的id')" href="javascript:;" ><i class="layui-icon">&#xe640;</i>删除</button>
+                    </td>
+                  </tr>
+                {%for m in all_menu%}
+
+                    {% if m.parent__caption == j.caption %}
+                    <tr cate-id='{{ m.id }}' fid='{{ j.id }}' >
+                        <td>
+                          <div class="layui-unselect layui-form-checkbox" lay-skin="primary" data-id='2'><i class="layui-icon">&#xe605;</i></div>
+                        </td>
+                        <td>{{ m.id }}</td>
+                        <td>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <i class="layui-icon x-show" status='true'>&#xe623;</i>
+                          {{ m.caption }}
+                        </td>
+                        <td><input type="text" class="layui-input x-sort" name="order" value="{{ m.level }}"></td>
+                        <td class="td-manage">
+                            <button class="layui-btn layui-btn layui-btn-xs"  onclick="x_admin_show('编辑','{% url 'menuEdit' %}?level={{ m.level }}&parent_id={{ m.id }}',w='500',h='350')" ><i class="layui-icon">&#xe642;</i>编辑</button>
+                            <button class="layui-btn layui-btn-warm layui-btn-xs"  onclick="x_admin_show('编辑','{% url 'menuAdd' %}?level={{ m.level }}&parent_id={{ m.id }}',w='500',h='350')" ><i class="layui-icon">&#xe642;</i>添加子菜单</button>
+                            <button class="layui-btn-danger layui-btn layui-btn-xs"  onclick="member_del(this,'要删除的id')" href="javascript:;" ><i class="layui-icon">&#xe640;</i>删除</button>
+                        </td>
+                      </tr>
+                        {%for z in all_menu%}
+                            {% if z.parent__caption == m.caption %}
+                                        <tr cate-id='{{ z.id }}' fid='{{ m.id }}' >
+                                <td>
+                                  <div class="layui-unselect layui-form-checkbox" lay-skin="primary" data-id='2'><i class="layui-icon">&#xe605;</i></div>
+                                </td>
+                                <td>{{ z.id }}</td>
+                                <td>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                |--{{ z.caption }}
+                                </td>
+                                            <td><input type="text" class="layui-input x-sort" name="order" value="{{ z.level }}"></td>
+                                <td class="td-manage">
+                                    <button class="layui-btn layui-btn layui-btn-xs"  onclick="x_admin_show('编辑','{% url 'menuEdit' %}?level={{ z.level }}&parent_id={{ z.id }}',w='500',h='350')" ><i class="layui-icon">&#xe642;</i>编辑</button>
+                                    <button class="layui-btn-danger layui-btn layui-btn-xs"  onclick="member_del(this,'要删除的id')" href="javascript:;" ><i class="layui-icon">&#xe640;</i>删除</button>
+                                </td>
+                              </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {%endfor%}
+            {%endif%}
+        {%endfor%}
+    {% endif%}
+{% endfor %}
+
+ </tbody>
+ </table>
+
+ <script>
+      function member_del(obj,id){
+          layer.confirm('确认要删除吗？',function(index){
+              //发异步删除数据
+              var cate_id = $(obj).parents("tr").attr("cate-id")
+              console.log(cate_id)
+
+              $.ajax({
+                        url: "{% url 'menuDel' %}",
+                        type: "POST",
+                        data:{"cate_id":cate_id,"csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                            $(obj).parents("tr").remove();
+                            layer.msg(data["msg"],{icon:1,time:1000});
+                        }
+              });
+
+          });
+      }
+ </script>
+{% endblock %}

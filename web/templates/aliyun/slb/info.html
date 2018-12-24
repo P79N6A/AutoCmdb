@@ -1,0 +1,178 @@
+{% extends 'aliyun/basic/index.html' %}
+
+{% block css %}
+    <style>
+        .layui-form-checkbox[lay-skin=primary] {
+            /* width: 100%; */
+            padding-left: 28px;
+        }
+    </style>
+{% endblock %}
+{% block tab_title %}
+
+
+
+
+{% endblock %}
+{% block ul_title %}
+
+<ul class="layui-nav left fast-add" lay-filter="">
+          <li class="layui-nav-item">
+                <a >
+                    <i class="iconfont">&#xe723;</i>  {{ slb_info.LoadBalancerName }}/{{ slb_info.Address }} <span style="color: green">({{ rds_info.DBInstanceStatus }})</span>
+                </a>
+          </li>
+    <li class="layui-nav-item">
+        <a id="revert_rds_list" href="{% url 'ali_slb_index' %}">返回实例列表</a>
+    </li>
+        </ul>
+
+{% endblock %}
+
+
+
+{% block conent %}
+    <div class="layui-tab-content" style="margin-top: 30px">
+    <ul class="layui-tab-title layui-tab-card">
+            <li class="layui-this">监听</li>
+            <li>默认服务器组</li>
+            <li >虚拟服务器组</li>
+            <li>主备服务器组</li>
+    </ul>
+        <div class="layui-colla-item layui-tab-item layui-show" >
+                <blockquote class="layui-elem-quote layui-colla-title">
+                  基本信息
+                </blockquote>
+
+                    <table class="layui-hide" id="ALI_table_slb" lay-filter="ALI_table_slb"></table>
+
+        </div>
+
+        <div class="layui-colla-item layui-tab-item layui-show" >
+                <blockquote class="layui-elem-quote layui-colla-title">
+                  1
+                </blockquote>
+                <div class="layui-colla-content layui-show">
+                    <p>111</p>
+                </div>
+             <blockquote class="layui-elem-quote layui-colla-title">
+                  1
+                </blockquote>
+                <div class="layui-colla-content">
+                    <p>111</p>
+                </div>
+        </div>
+
+        <div class="layui-tab-item" name="vserver_group" id="vserver_group">
+            <blockquote class="layui-elem-quote layui-colla-title">
+                  基本信息
+                </blockquote>
+
+            <table class="layui-hide" id="table_slb_server_groups" lay-filter="table_slb_server_groups"></table>
+
+        </div>
+        <div class="layui-tab-item">内容4</div>
+
+    </div>
+
+{#    <div class="x-body layui-anim layui-anim-up" style="overflow-y:scroll;min-height:990px;">#}
+{#    </div>#}
+
+{% endblock %}
+{% block js %}
+
+    <script src="/static/plugins/layui/layui.js" charset="utf-8"></script>
+    <script type="text/html" id="vServerGroup">
+        <a href="#vserver_group" class="layui-table-link" target="_blank">d.VServerGroupId</a>
+    </script>
+
+    <script>
+        layui.use('table', function(){
+            TABLE_1 = layui.table;
+            TABLE_1.render({
+                autoSort:true,
+                elem: '#ALI_table_slb',
+                id:"ALI_table_slb"
+                ,url:'{% url 'slb_info' %}'
+                ,method:'post'
+                ,where: {"csrfmiddlewaretoken":"{{ csrf_token }}",
+                    "accountName":"{{ accountName }}",
+                    "RegionId":"{{ RegionId }}",
+                    "LoadBalancerId":"{{ LoadBalancerId }}"}
+                ,toolbar: '#toolbarDemo'
+                ,title: '1111'
+                ,totalRow: true
+                ,height:'full-200',
+                cellMinWidth: 80
+                {#width:1400#}
+                ,defaultToolbar: ['filter', 'print', 'exports']
+                ,cols: [[
+                    {type: 'checkbox', fixed: 'left'},
+                    {field:'HealthCheckType', title:'前端协议',totalRowText:"前端协议"},
+                    {field:'ListenerPort', title:'前端端口',totalRowText:"前端端口"},
+                    {field:'DomainType', title:'名称', unresize: false, sort: true,width:80,totalRowText:"名称"},
+                    {field:'HealthCheck', title:'健康状态', unresize: false, sort: true,totalRowText:"健康状态"},
+                    {field:'Scheduler', title:'调度算法', unresize: false, sort: true,totalRowText:"域名实名认证状态"},
+                    {field:'PersistenceTimeout', title:'会话保持', unresize: false, sort: true,totalRowText:"会话保持"},
+                    {field:'Bandwidth', title:'带宽峰值', unresize: false, sort: true,totalRowText:"带宽峰值"},
+                    {field:'VServerGroupId', title:'服务器组', unresize: false, sort: true,totalRowText:"服务器组"},
+                    {field:'AclId', title:'访问控制', unresize: false, sort: true,totalRowText:"访问控制"},
+            ]],
+                skin: 'row', //表格风格
+                even: true, //隔行背景
+                page: true, //是否显示分页
+                limits: [5,10,15,20,50,100,200], //显示
+                limit: 50, //每页默认显示的数量
+                request: {
+
+                    pageName: 'pageStart', //页码的参数名称，默认：page
+                    limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+            });
+
+        })
+
+    </script>
+
+    <script>
+        layui.use('table', function(){
+                TABLE_1 = layui.table;
+                TABLE_1.render({
+                    autoSort:true,
+                    elem: '#table_slb_server_groups',
+                    id:"table_slb_server_groups"
+                    ,url:'{% url 'slb_server_group' %}'
+                    ,method:'post'
+                    ,where: {"csrfmiddlewaretoken":"{{ csrf_token }}",
+                        "accountName":"{{ accountName }}",
+                        "RegionId":"{{ RegionId }}",
+                        "LoadBalancerId":"{{ LoadBalancerId }}",
+                        "md":"post"}
+                    ,toolbar: '#toolbarDemo'
+                    ,title: '1111'
+                    ,totalRow: true
+                    ,height:'full-200',
+                    cellMinWidth: 80
+                    {#width:1400#}
+                    ,defaultToolbar: ['filter', 'print', 'exports']
+                    ,cols: [[
+                        {type: 'checkbox', fixed: 'left'},
+                        {field:'VServerGroupName', unresize: false, sort: true, title:'分组名称',totalRowText:"前端协议"},
+                        {field:'VServerGroupId', unresize: false, sort: true, title:'分组ID',totalRowText:"分组ID"},
+                ]],
+                    skin: 'row', //表格风格
+                    even: true, //隔行背景
+                    page: true, //是否显示分页
+                    limits: [5,10,15,20,50,100,200], //显示
+                    limit: 50, //每页默认显示的数量
+                    request: {
+                        pageName: 'pageStart', //页码的参数名称，默认：page
+                        limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                    }
+                });
+
+            })
+    </script>
+
+
+{% endblock %}

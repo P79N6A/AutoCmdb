@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css"  media="all">
+</head>
+<body>
+<div>
+    <div>虚拟服务器组名称</div>
+    <div>VServerGroupName</div>
+</div>
+
+<div>
+    <table class="layui-hide" id="table_slb_vserver_g" lay-filter="table_slb_vserver_g"></table>
+    <div>ServerId    Port    Weight</div>
+</div>
+
+<script src="/static/plugins/layui/layui.js" charset="utf-8"></script>
+<script>
+        layui.use('table', function(){
+            TABLE_1 = layui.table;
+            TABLE_1.render({
+                autoSort:true,
+                elem: '#table_slb_vserver_g',
+                id:"table_slb_vserver_g"
+                ,url:'{% url 'slb_server_group_s' %}'
+                ,method:'post'
+                ,where: {"csrfmiddlewaretoken":"{{ csrf_token }}",
+                    "accountName":"{{ accountName }}",
+                    "RegionId":"{{ RegionId }}",
+                    "VServerGroupId":"{{ VServerGroupId }}"}
+                ,toolbar: '#toolbarDemo'
+                ,title: '1111'
+                ,totalRow: true
+                ,height:'full-200',
+                cellMinWidth: 80
+                {#width:1400#}
+                ,defaultToolbar: ['filter', 'print', 'exports']
+                ,cols: [[
+                    {type: 'checkbox', fixed: 'left'},
+                    {field:'ServerId', title:'前端协议',totalRowText:"前端协议"},
+                    {field:'Port', title:'前端端口',totalRowText:"前端端口"},
+                    {field:'Weight', title:'名称', unresize: false, sort: true,width:80,totalRowText:"名称"},
+            ]],
+                skin: 'row', //表格风格
+                even: true, //隔行背景
+                page: true, //是否显示分页
+                limits: [5,10,15,20,50,100,200], //显示
+                limit: 50, //每页默认显示的数量
+                request: {
+                    pageName: 'pageStart', //页码的参数名称，默认：page
+                    limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+            });
+        })
+
+    </script>
+</body>
+</html>

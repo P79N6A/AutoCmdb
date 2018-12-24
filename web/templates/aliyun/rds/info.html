@@ -1,0 +1,339 @@
+{% extends 'aliyun/basic/index.html' %}
+
+{% block css %}
+    <style>
+        .layui-form-checkbox[lay-skin=primary] {
+            /* width: 100%; */
+            padding-left: 28px;
+        }
+    </style>
+{% endblock %}
+{% block tab_title %}
+
+          <ul class="layui-tab-title layui-tab-card">
+            <li class="layui-this">基本信息</li>
+            <li>账号管理</li>
+            <li>数据库管理</li>
+            <li>数据库连接</li>
+            <li>数据安全性</li>
+          </ul>
+
+
+{% endblock %}
+{% block ul_title %}
+
+<ul class="layui-nav left fast-add" lay-filter="">
+          <li class="layui-nav-item">
+                <a >
+                    <i class="iconfont">&#xe723;</i>  {{ rds_info.DBInstanceId }} <span style="color: green">({{ rds_info.DBInstanceStatus }})</span>
+                </a>
+          </li>
+    <li class="layui-nav-item">
+        <a id="revert_rds_list" href="{% url 'ali_rds_index' %}">返回实例列表</a>
+    </li>
+        </ul>
+
+{% endblock %}
+
+
+
+{% block conent %}
+    <div class="layui-tab-content" style="margin-top: 30px">
+        <div class="layui-colla-item layui-tab-item layui-show" >
+                <blockquote class="layui-elem-quote layui-colla-title">
+                  基本信息
+                </blockquote>
+                <div id="basic_info" class="layui-colla-content layui-show">
+                    <table class="layui-table">
+                    <tbody>
+                        <tr>
+                            <th>实例ID: <span style="font-weight: bold">{{ rds_info.DBInstanceId }}</span></th>
+                            <td>名称: {{ rds_info.DBInstanceId }}</td></tr>
+                        <tr>
+                            <th>地域可用区: {{ rds_info.ZoneId }}</th>
+                            <td>类型及系列: {{ rds_info.Category }}</td></tr>
+                        <tr>
+                            <th>内网地址: {{ rds_info.ConnectionString }}</th>
+                            <td>内网端口: {{ rds_info.Port }}</td></tr>
+                        <tr>
+                            <th colspan="2">
+                                存储类型: {{ rds_info.DBInstanceStorageType }}云盘
+                            </th>
+                        <tr>
+                            <th colspan="2" style="color: red">
+                                温馨提示：请使用以上访问连接串进行实例连接，VIP在业务维护中可能会变化。
+                            </th>
+                    </tbody>
+                </table>
+                </div>
+             <blockquote class="layui-elem-quote layui-colla-title">
+                  运行状态
+                </blockquote>
+                <div class="layui-colla-content layui-show">
+                    <table class="layui-table">
+                        <tbody>
+                            <tr>
+                                <th>运行状态: <span style="color: green">{{ rds_info.DBInstanceStatus }}</span></th>
+                                <td>付费类型: {{ rds_info.PayType }}</td>
+                                <td>创建时间: {{ rds_info.CreationTime }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+             <blockquote class="layui-elem-quote layui-colla-title">
+                  配置信息
+                </blockquote>
+                <div class="layui-colla-content layui-show">
+                    <table class="layui-table">
+                        <tbody>
+                            <tr>
+                                <th>规格族: {{ rds_info.DBInstanceClassType }}</th>
+                                <td>数据库类型: {{ rds_info.Engine}} {{ rds_info.EngineVersion }}</td>
+                                <td>CPU: {{ rds_info.DBInstanceCPU}} 核</td>
+                            </tr>
+                            <tr>
+                                <th>数据库内存: {{ rds_info.DBInstanceMemory}}MB</th>
+                                <td>最大连接数: {{ rds_info.MaxConnections}}</td>
+                                <td>可维护时间段: {{ rds_info.MaintainTime}}</td>
+                            </tr>
+                            <tr>
+                                <th colspan="3">实例规格: {{ rds_info.DBInstanceClass}}</th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+             <blockquote class="layui-elem-quote layui-colla-title">
+                  使用量统计
+                </blockquote>
+                <div class="layui-colla-content layui-show">
+                    <table class="layui-table">
+                        <tbody>
+                            <tr>
+                                <th>存储空间:已使用 {{ rds_info.DBInstanceDiskUsed }}G (共{{ rds_info.DBInstanceStorage }}G)</th>
+                                <td>备份使用量:（基础版备份文件免费保存，最长7天） 查看详情</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+        </div>
+
+        <div class="layui-colla-item layui-tab-item layui-show" >
+                <blockquote class="layui-elem-quote layui-colla-title">
+                  1
+                </blockquote>
+                <div class="layui-colla-content layui-show">
+                    <p>111</p>
+                </div>
+             <blockquote class="layui-elem-quote layui-colla-title">
+                  1
+                </blockquote>
+                <div class="layui-colla-content">
+                    <p>111</p>
+                </div>
+        </div>
+
+        <div class="layui-tab-item">内容3</div>
+        <div class="layui-tab-item">内容4</div>
+        <div class="layui-colla-item layui-tab-item layui-show" >
+                <blockquote class="layui-elem-quote">数据安全性</blockquote>
+                <fieldset class="layui-elem-field layui-field-title">
+                    <legend>白名单设置</legend>
+
+                    <div class="layui-collapse" lay-accordion="">
+                    {% for i in rds_info.DBInstanceIPArray %}
+                        <div class="layui-colla-item">
+                        <blockquote class="layui-colla-title">
+                            {{ i.DBInstanceIPArrayName }}
+                        </blockquote>
+                        <div class="layui-colla-content layui-show">
+                            {{ i.SecurityIPList }}
+                        </div>
+                        </div>
+                    {% endfor %}
+                        <span class="text-muted" text-plain="" type="security.tips" text="text">注：RDS IP白名单设计支持IP段如X.X.X.X/X的配置，设置为127.0.0.1代表禁止所有地址访问。</span>
+                        <a  href="https://help.aliyun.com/document_detail/26198.html?spm=5176.2020520104.210.7.7b491450h7gYw9">白名单设置说明</a>
+                    </div>
+                </fieldset>
+
+            </div>
+    </div>
+
+{#    <div class="x-body layui-anim layui-anim-up" style="overflow-y:scroll;min-height:990px;">#}
+{#    </div>#}
+
+{% endblock %}
+{% block js %}
+
+    <script type="text/html" id="dnsRecordbar" >
+      <a class="layui-btn layui-btn-xs" lay-event="see_dns">查看解析</a>
+    </script>
+
+
+    <script src="/static/plugins/layui/layui.js" charset="utf-8"></script>
+    <script>
+        layui.use('table', function(){
+            TABLE_1 = layui.table;
+            TABLE_1.render({
+                autoSort:true,
+                elem: '#ALI_table_domain',
+                id:"ALI_table_domain"
+                ,url:'{% url 'get_seconde_domain' %}'
+                ,method:'post'
+                ,where: {"csrfmiddlewaretoken":"{{ csrf_token }}","accountName":"全部"}
+                ,toolbar: '#toolbarDemo'
+                ,title: '阿里云域名资产表'
+                ,totalRow: true
+                ,height:'full-200',
+                cellMinWidth: 80
+                {#width:1400#}
+                ,defaultToolbar: ['filter', 'print', 'exports']
+                ,cols: [[
+                    {type: 'checkbox', fixed: 'left'},
+                    {field:'accountName', title:'账号',totalRowText:"账号"},
+                    {field:'DomainName', title:'域名',totalRowText:"域名"},
+                    {field:'DomainType', title:'域名类型', unresize: false, sort: true,width:80,totalRowText:"域名类型"},
+                    {field:'DomainStatus', title:'域名状态', unresize: false, sort: true,totalRowText:"域名状态"},
+                    {field:'DomainAuditStatus', title:'域名实名认证状态', unresize: false, sort: true,totalRowText:"域名实名认证状态"},
+                    {field:'ExpirationDateStatus', title:'域名过期状态', unresize: false, sort: true,totalRowText:"域名过期状态"},
+                    {field:'RegistrantType', title:'域名注册类型', unresize: false, sort: true,totalRowText:"域名注册类型"},
+                    {field:'RegistrationDate', title:'注册日期', unresize: false, sort: true,totalRowText:"注册日期"},
+                    {field:'ExpirationDate', title:'到期日期', unresize: false, sort: true,totalRowText:"到期日期"},
+                    {fixed: 'right', title:'操作', align:'center', toolbar: '#dnsRecordbar', width:200}
+            ]],
+                skin: 'row', //表格风格
+                even: true, //隔行背景
+                page: true, //是否显示分页
+                limits: [5,10,15,20,50,100,200], //显示
+                limit: 50, //每页默认显示的数量
+                request: {
+
+                    pageName: 'pageStart', //页码的参数名称，默认：page
+                    limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+            });
+            TABLE_1.on('checkbox(useruv)', function(obj){
+            console.log(obj)
+            });
+            TABLE_1.on('tool(useruv)', function(obj){
+                var data = obj.data;
+
+                if(obj.event === 'see_dns'){
+                    var url = "{% url 'dns_records' %}"+"?accountName="+data.accountName
+                        +"&domainName="+data.domainName;
+                    console.log(url)
+                    window.location.href = url;
+                    console.log(data.domainName)
+                } else if(obj.event === 'del'){
+                  layer.confirm('真的删除行么', function(index){
+                    $.ajax({
+                        url: "{% url 'delete_ecs' %}",
+                        type: "POST",
+                        data:{"uvid":data.id,"csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                        if(data.state==1){
+                           //删除这一行
+                            obj.del();
+                           //关闭弹框
+                            layer.close(index);
+                            layer.msg("删除成功", {icon: 6});
+                        }else{
+                            layer.msg("删除失败", {icon: 5});
+                        }
+                }
+
+            });
+                  });
+                } else if(obj.event === 'edit'){
+                  layer.alert('编辑行：<br>'+ JSON.stringify(data))
+                }
+        })
+        })
+
+        $('#searchBtn').on('click',function(){
+        var type = $(this).data('type');
+        active[type] ? active[type].call(this) : '';
+     });
+    // 点击获取数据
+        var  active = {
+            getInfo: function () {
+                var orderId=$('#select_orderId').val();
+                if (orderId) {
+                    var index = layer.msg('查询中，请稍候...',{icon: 16,time:false,shade:0});
+                    setTimeout(function(){
+                        TABLE_1.reload('ALI_table_domain', { //表格的id
+                            url:'{% url 'get_seconde_domain' %}',
+                            where: {
+                                'orderId':$.trim(orderId)
+                            },
+                            skin: 'row', //表格风格
+                            even: true, //隔行背景
+                            page: true, //是否显示分页
+                            limits: [5,10,15,20,50,100,200], //显示
+                            limit: 50, //每页默认显示的数量
+
+                        });
+                        layer.close(index);
+                    },800);
+                } else {
+                    layer.msg("请输入域名");
+                }
+            },
+        };
+  //监听回车事件,扫描枪一扫描或者按下回车键就直接执行查询
+        $("#select_orderId").bind("keyup", function (e) {
+            if (e.keyCode == 13) {
+                var type = "getInfo";
+                active[type] ? active[type].call(this) : '';
+            }
+        });
+
+
+
+
+        $("#find_act").click(function () {
+
+            var suppUserId = $("#suppUserId").find("option:selected").text();
+            console.log(suppUserId);
+            TABLE_1.reload("ALI_table_domain", {
+                  url: '{% url 'get_seconde_domain' %}'
+                 ,method:'post'
+                  ,where: {"accountName":suppUserId, "csrfmiddlewaretoken":"{{ csrf_token }}",'orderId':''} //设定异步数据接口的额外参数
+                  //,height: 300)
+                 ,cols: [[
+                    {type: 'checkbox', fixed: 'left'}
+                    ,{field:'accountName', title:'账号',totalRowText:"账号"},
+                    {field:'DomainName', title:'域名',totalRowText:"域名"},
+                    {field:'DomainType', title:'域名类型', unresize: false, sort: true,width:80,totalRowText:"域名类型"},
+                    {field:'DomainStatus', title:'域名状态', unresize: false, sort: true,totalRowText:"域名状态"},
+                    {field:'DomainAuditStatus', title:'域名实名认证状态', unresize: false, sort: true,totalRowText:"域名实名认证状态"},
+                    {field:'ExpirationDateStatus', title:'域名过期状态', unresize: false, sort: true,totalRowText:"域名过期状态"},
+                    {field:'RegistrantType', title:'域名注册类型', unresize: false, sort: true,totalRowText:"域名注册类型"},
+                    {field:'RegistrationDate', title:'注册日期', unresize: false, sort: true,totalRowText:"注册日期"},
+                    {field:'ExpirationDate', title:'到期日期', unresize: false, sort: true,totalRowText:"到期日期"},
+
+            ]]
+
+            });
+
+        })
+
+    </script>
+    <script>
+        $(function () {
+            $("#suppId option:gt(0)").remove();
+            /*初始化省份信息*/
+            $.post("{% url 'account_getProv' %}", {
+                "csrfmiddlewaretoken": "{{ csrf_token }}"
+            },function (data) {
+                var result = JSON.parse(data);
+                $.each(result, function (code, item) {
+                    liNode = $("<option></option>").attr("id",item.id).text(item.accountName);
+                    $("#suppUserId").append(liNode);
+                })
+            })
+            $("#suppId option:gt(0)")
+
+        })
+
+    </script>
+{% endblock %}

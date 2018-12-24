@@ -1,0 +1,233 @@
+{% extends 'rbac/basic/index.html' %}
+{% block rbac_js %}
+    <link rel="stylesheet" href="/static/plugins/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="/static/plugins/formSelects-v4/dist/formSelects-v4.css"/>
+
+
+{% endblock %}
+
+{#{% block rbac_js %}#}
+{#    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css">#}
+{#    <script src="/static/plugins/layui/layui.js"></script>#}
+{#    <script src="/static/js/comm.js"></script>#}
+{#{% endblock %}#}
+
+{% block rbac_body %}
+    <button class="layui-btn" onclick="x_admin_show('添加权限','{% url 'authAdd' %}',w='700',h='300')" >添加权限</button>
+    <table class="layui-table">
+        <thead>
+            <tr>
+                <th width="20">
+                 <div class="layui-unselect header layui-form-checkbox" lay-skin="primary"><i class="layui-icon">&#xe605;</i></div>
+             </th>
+                <th width="70">ID</th>
+                <th>权限名称</th>
+                <th>url正则</th>
+                <th>菜单名称</th>
+                <th width="300">操作</th>
+            </tr>
+        </thead>
+        <tbody id="table_sel">
+{#            <div class="layui-form-item">#}
+{#                <label for="" class="layui-form-label">测试1</label>#}
+{#                <div class="layui-input-block">#}
+{#                    <input type="text" id="tree" lay-filter="tree" class="layui-input">#}
+{#                </div>#}
+{#           </div>#}
+
+            {% for i in auth_objs %}
+                <tr cate-id='{{ i.id}}' id="cate{{ i.id }}">
+                    <td>
+                        <div class="layui-unselect layui-form-checkbox" lay-skin="primary" data-id='2'><i class="layui-icon">&#xe605;</i></div>
+                    </td>
+                    <td>{{ i.id }}</td>
+                    <td id="caption{{ i.id  }}">
+                        <div>
+                        {{ i.caption }}
+                        </div>
+                    </td>
+                    <td id="url{{ i.id  }}">
+                        <div>
+                        {{ i.url }}
+                        </div>
+                    </td>
+                    <td><input id="menu{{ i.id  }}" value="{{ i.menu }}" style="display: none">
+                        <input type="text" id="tree{{ i.id }}" lay-filter="tree{{ i.id }}" class="layui-input" >
+                    </td>
+                    <td class="td-manage" id="mange{{ i.id }}">
+                        <button class="layui-btn layui-btn layui-btn-xs" id="save_menu" onclick="save_m({{ i.id }})"><i class="layui-icon">&#xe642;</i>保存菜单</button>
+                        <button class="layui-btn layui-btn-warm layui-btn-xs" id="eidt_au{{ i.id }}" onclick="edit_auth({{ i.id }})"><i class="layui-icon">&#xe642;</i><span>编辑</span></button>
+                        <button class="layui-btn-danger layui-btn layui-btn-xs"  onclick="member_del(this,'要删除的id')" href="javascript:;" ><i class="layui-icon">&#xe640;</i>删除</button>
+                    </td>
+                </tr>
+            {% endfor %}
+
+        </tbody>
+ </table>
+
+{% endblock %}
+
+{% block js %}
+    <script src="/static/js/comm.js"></script>
+    <script>
+        var tab_sel = $("#table_sel tr");
+        console.log(tab_sel)
+        $.each(tab_sel, function (code, item) {
+            console.log(code,item)
+            layui.use(['treeSelect', 'form', 'layer'], function () {
+            var treeSelect= layui.treeSelect,
+            form = layui.form,
+            $ = layui.jquery,
+            layer = layui.layer;
+            var tree_val = "#tree";
+            var menu_id = "#menu";
+            var tree_fil = "tree";
+            var cate_id = "#cate"
+            menu_id+=$($(item).children()[1]).text();
+            tree_val+=$($(item).children()[1]).text();
+            tree_fil +=$($(item).children()[1]).text();
+            cate_id+=$($(item).children()[1]).text();
+            treeSelect.render({
+            // 选择器
+            elem: tree_val,
+            // 数据
+            data:"{% url 'menuSelect' %}",
+            // 异步加载方式：get/post，默认get
+            type: 'get',
+            // 占位符
+            placeholder: '修改菜单信息',
+            // 是否开启搜索功能：true/false，默认false
+            search: true,
+            // 一些可定制的样式
+            style: {
+                folder: {
+                    enable: true
+                },
+                line: {
+                    enable: true
+                }
+            },
+            // 点击回调
+            click: function(d){
+                $(menu_id).children().remove()
+                $(menu_id).append("<a>"+$(d)[0]["current"]["id"]+"</a>")
+            },
+            // 加载完成后的回调函数
+            success: function (d) {
+                {#console.log($(d));#}
+//                选中节点，根据id筛选
+
+                var menu_i = parseInt($(menu_id).val());
+
+                if(!isNaN(menu_i)){
+                    treeSelect.checkNode(tree_fil, menu_i);
+                } else{
+
+                }
+
+//                获取zTree对象，可以调用zTree方法
+               var treeObj = treeSelect.zTree(tree_fil);
+
+               console.log(tree_fil);
+//                刷新树结构
+               treeSelect.refresh(tree_fil);
+            }
+        });
+
+            $('#layer').click(function(){
+            layer.open({
+                type: 1,
+                title: 'Layer',
+                content: $('.layui-container'),
+                area: ['500px', '300px']
+                });
+            });
+
+            $('#btnDestory').click(function(){
+                treeSelect.destroy(tree_fil);
+            });
+
+            $('#btnRevoke').click(function(){
+                treeSelect.revokeNode(tree_fil, function(d){
+                    console.log(d);
+                    console.log(d.treeId);
+                });
+            });
+
+        })
+
+
+        // 通过layer打开
+
+
+
+
+    });
+        // 保存菜单
+        function save_m(mid){
+            var change_menu_id = $("#menu"+mid).children().text();
+            var caption_name = $("#caption"+mid).children().val();
+            var url_name = $("#url"+mid).children().val();
+            $.ajax({
+                        url: "{% url 'authMenuSave' %}",
+                        type: "POST",
+                        data:{"mid":mid,
+                            "change_menu_id":change_menu_id,
+                            "caption_name":caption_name,
+                            "url_name":url_name,
+                            "csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                            console.log(data)
+                            layer.msg(data["msg"],{icon:1,time:1000});
+                            window.location.reload()
+                        }
+              });
+        }
+
+        function edit_auth(mid) {
+            console.log($("#caption"+mid));
+            var edit_name = $("#eidt_au"+mid+" span");
+            if (edit_name.text() == "编辑"){
+                $("#caption"+mid).children().replaceWith("<input class='layui-input' value="+$("#caption"+mid).children().html()+'>');
+                $("#url"+mid).children().replaceWith("<input class='layui-input' value="+$("#url"+mid).children().html()+'>');
+                edit_name.text("取消编辑")
+            }else {
+                $("#caption"+mid).children().replaceWith("<div>"+$("#caption"+mid).children().val()+"</div>");
+                $("#url"+mid).children().replaceWith("<div>"+$("#url"+mid).children().val()+"</div>");
+                edit_name.text("编辑")
+            }
+
+
+        }
+
+        function member_del(obj,id){
+          layer.confirm('确认要删除吗？',function(index){
+              //发异步删除数据
+              var cate_id = $(obj).parents("tr").attr("cate-id")
+              console.log(cate_id)
+
+              $.ajax({
+                        url: "{% url 'authDel' %}",
+                        type: "POST",
+                        data:{"cate_id":cate_id,"csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                            $(obj).parents("tr").remove();
+                            layer.msg(data["msg"],{icon:1,time:1000});
+                        },error: function () {
+                            layer.msg("没有权限，禁止删除",{icon:0,time:1000});
+                  }
+              });
+
+          });
+      }
+
+        function add_auth() {
+            console.log(111)
+        }
+
+
+
+    </script>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends 'rbac/basic/index.html' %}
+
+{% block rbac_js %}
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css">
+    <script src="/static/plugins/layui/layui.js"></script>
+    <script src="/static/js/comm.js"></script>
+{% endblock %}
+
+{% block rbac_body %}
+
+    <table class="layui-table">
+        <thead>
+            <tr>
+                <th>权限名称</th>
+                <th>url正则</th>
+                <th>菜单选择</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input class="layui-input" id="caption_val"></td>
+                <td><input class="layui-input" id="url_val"></td>
+                <td><input id="menu" value="{{ i.menu }}" style="display: none">
+                    <input type="text" id="tree" lay-filter="tree" class="layui-input" ></td>
+            </tr>
+        </tbody>
+    </table>
+    <button class="layui-btn" style="float:right" id="btnAuthAdd">添加</button>
+    <script>
+
+    layui.use(['treeSelect', 'form', 'layer'], function () {
+        var treeSelect= layui.treeSelect,
+            form = layui.form,
+            $ = layui.jquery,
+            layer = layui.layer;
+        var menu_id = "#menu";
+        treeSelect.render({
+            // 选择器
+            elem: '#tree',
+            // 数据
+            data: '{% url 'menuSelect' %}',
+            // 异步加载方式：get/post，默认get
+            type: 'get',
+            // 占位符
+            placeholder: '修改默认提示信息',
+            // 是否开启搜索功能：true/false，默认false
+            search: true,
+            // 一些可定制的样式
+            style: {
+                folder: {
+                    enable: true
+                },
+                line: {
+                    enable: true
+                }
+            },
+            // 点击回调
+            click: function(d){
+                $(menu_id).children().remove()
+                $(menu_id).append("<a>"+$(d)[0]["current"]["id"]+"</a>")
+                //console.log(d);
+            },
+            // 加载完成后的回调函数
+            success: function (d) {
+                $("#btnAuthAdd").click(function () {
+                    var auth_val = $("#caption_val").val();
+                    var url_val = $("#url_val").val();
+                    var menu_id = $(menu_id).children().text();
+                    $.ajax({
+                        url: "{% url 'authAdd' %}",
+                        type: "POST",
+                        data:{"caption":auth_val,
+                            "url":url_val,
+                            "menu":menu_id,
+                            "csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                            console.log(data)
+                            layer.msg(data["msg"],{icon:1,time:1000});
+                        }
+              });
+                })
+                //console.log(d);
+//                选中节点，根据id筛选
+                {#treeSelect.checkNode('tree', 3);#}
+
+                {#console.log($('#tree').val());#}
+
+//                获取zTree对象，可以调用zTree方法
+               var treeObj = treeSelect.zTree('tree');
+               console.log(treeObj);
+
+//                刷新树结构
+               treeSelect.refresh('tree');
+            }
+        });
+
+        // 通过layer打开
+        $('#layer').click(function(){
+            layer.open({
+                type: 1,
+                title: 'Layer',
+                content: $('.layui-container'),
+                area: ['500px', '300px']
+            });
+        });
+
+        $('#btnDestory').click(function(){
+            treeSelect.destroy('tree');
+        });
+
+        $('#btnRevoke').click(function(){
+            treeSelect.revokeNode('tree', function(d){
+                console.log(d);
+                console.log(d.treeId);
+            });
+        });
+        
+
+
+
+    });
+
+
+        // 通过layer打开
+
+
+
+
+
+    </script>
+{% endblock %}

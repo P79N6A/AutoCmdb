@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>layui</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="/static/plugins/layui/css/layui.css"  media="all">
+
+  <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body>
+{#<form class="layui-form" action="">#}
+{#    <div class="layui-form-item" style="line-height: 50px">#}
+{#        <div class="layui-inline" >#}
+{#            <label class="layui-form-label">记录类型</label>#}
+{#            <div class="layui-input-inline" style="width: 400px">#}
+{#            <select name="city" lay-verify="required">#}
+{#                <option value="A">A- 将域名指向一个IPV4地址</option>#}
+{#                <option value="CNAME">CNAME- 将域名指向另外一个域名</option>#}
+{#                <option value="AAAA">AAAA- 将域名指向一个IPV6地址</option>#}
+{#                <option value="NS">NS- 将子域名指定其他DNS服务器解析</option>#}
+{#                <option value="MX">MX- 将域名指向邮件服务器地址</option>#}
+{#                <option value="SRV">SRV- 记录提供特定的服务的服务器</option>#}
+{#                <option value="TXT">TXT- 文本长度限制512，通常做SPF记录（反垃圾邮件）</option>#}
+{#                <option value="CAA">CAA- CA证书颁发机构授权校验</option>#}
+{#                <option value="显性URL">显性URL- 将域名302重定向到另外一个地址</option>#}
+{#                <option value="隐形URL">隐形URL- 与显性URL类似，但是会隐藏真实目标地址</option>#}
+{#          </select>#}
+{#        </div>#}
+{#      </div>#}
+{#        <div class="layui-inline" >#}
+{#          <label class="layui-form-label">主机记录</label>#}
+{#          <div class="layui-input-inline" style="width: 200px">#}
+{#              <input type="tel" name="phone" lay-verify="required|phone" autocomplete="off" class="layui-input">#}
+{#          </div>#}
+{#            <div class="layui-input-inline">#}
+{#                <span>.{{ domainName }}</span>#}
+{#          </div>#}
+{#        </div>#}
+{#        <div class="layui-inline" >#}
+{#          <label class="layui-form-label">解析线路</label>#}
+{#          <div class="layui-input-inline" style="width: 400px">#}
+{#              <input type="tel" name="phone" lay-verify="required|phone" autocomplete="off" class="layui-input">#}
+{#          </div>#}
+{#        </div>#}
+{#        <div class="layui-inline">#}
+{#          <label class="layui-form-label"><span style="color: red">* </span>记录值</label>#}
+{#          <div class="layui-input-inline" style="width: 400px">#}
+{#              <input type="tel" name="phone" lay-verify="required|phone" autocomplete="off" class="layui-input">#}
+{#          </div>#}
+{#        </div>#}
+{#        <div class="layui-inline" style="display: none">#}
+{#            <label class="layui-form-label"><span style="color: red">* </span>TTL</label>#}
+{#          <div class="layui-input-inline" style="width: 400px">#}
+{#              <input type="tel" name="phone" lay-verify="required|phone" autocomplete="off" class="layui-input">#}
+{#          </div>#}
+{#        </div>#}
+{#        <div class="layui-inline" >#}
+{#            <label class="layui-form-label"><span style="color: red">* </span>TTL</label>#}
+{#          <div class="layui-input-inline" style="width: 400px">#}
+{#              <input type="tel" name="phone" lay-verify="required|phone" autocomplete="off" class="layui-input">#}
+{#          </div>#}
+{#        </div>#}
+{#    </div>#}
+{##}
+{##}
+{##}
+{##}
+{#</form>#}
+<form action="/" class="layui-form" method="POST" lay-filte = "formTest" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="layui-form-item" style="line-height: 80px">
+        <div class="layui-inline" style="line-height: 80px">
+            <label class="layui-form-label">记录类型</label>
+            <div class="layui-input-inline" style="width: 400px">
+                {{ form.remarkType }} {{ form.remarkType.errors }}
+            </div>
+        </div>
+        <div class="layui-inline" style="line-height: 80px" >
+            <label class="layui-form-label">主机记录</label>
+            <div class="layui-input-inline" style="width: 200px">
+                {{ form.domainType }} {{ form.domainType.errors }}
+            </div>
+            <div class="layui-input-inline">
+                <span>.{{ domainName }}</span>
+          </div>
+        </div>
+        <div class="layui-inline" style="line-height: 80px">
+            <label class="layui-form-label">解析线路</label>
+            <div class="layui-input-inline" style="width: 400px">
+                {{ form.line }} {{ form.line.errors }}
+            </div>
+        </div>
+
+        <div class="layui-inline" style="line-height: 80px">
+            <label class="layui-form-label"><span style="color: red">* </span>记录值</label>
+            <div  class="layui-input-inline"  style="width: 400px">
+                {{ form.value }} {{ form.value.errors }}
+            </div>
+        </div>
+
+
+        <div class="layui-inline MX" id="MX" style="line-height: 80px;display: none;" >
+            <label class="layui-form-label"><span style="color: red">* </span>MX优先级</label>
+            <div  class="layui-input-inline"  style="width: 400px">
+                {{ form.mx }} {{ form.mx.errors }}
+            </div>
+        </div>
+
+        <div class="layui-inline" style="line-height: 80px">
+            <label class="layui-form-label"><span style="color: red">* </span>TTL</label>
+            <div class="layui-input-inline" style="width: 400px">
+                {{ form.ttl }} {{ form.ttl.errors }}
+            </div>
+        </div>
+    </div>
+
+
+    <div class="layui-input-block">
+      <textarea class="layui-textarea layui-hide" name="content" lay-verify="content" id="LAY_demo_editor"></textarea>
+    </div>
+
+    <div class="layui-form-item">
+    <div class="layui-input-block">
+      <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+      <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+  </div>
+</form>
+<script src="/static/plugins/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+//Demo
+ $(function () {
+
+
+    var RR = $("#domainType").val("{{ record.RR }}")
+     var value = $("#value").val("{{ record.Value }}")
+     var remarkType = $("#remarkType").val("{{ record.Type }}")
+     var line = "{{ record.Line }}";
+
+     if (line == "default"){
+         var Line = $("#Line").val("default")
+     }else {
+         var Line = $("#Line").val(line)
+     }
+     console.log("{{ record.Line }}",$("#Line").val())
+     var ttl = $("#ttl").val("{{ record.TTL }}")
+ })
+
+
+
+layui.use('form', function(){
+  var form = layui.form
+  ,layer = layui.layer
+  ,layedit = layui.layedit
+  ,laydate = layui.laydate;
+
+
+se = '';
+count = 0
+form.on('select', function(data){
+
+    var select_data = data.value
+    console.log(data.othis)
+    var arr = new Array("defult","unicom","telecom","mobile","edu","oversea","baidu","biying","google","600","1800","3600","43200","86400");
+    console.log(select_data)
+    if ($.inArray(select_data, arr) == -1 ){
+        if (select_data == "MX"){
+            count = 0
+            se = "mx"
+            $("#MX").toggle()
+        }else {
+            count = 1
+            se = "other"
+            $("#MX").hide()
+        }
+
+    }
+    else {
+        if (se == "mx"){
+
+        }else {
+            $("#MX").hide()
+
+        }
+
+        }
+
+  });
+
+
+form.val("formTest[domainvalut]", {
+    "va":"1234"
+})
+
+
+
+
+form.verify({
+  username: function(value, item){ //value：表单的值、item：表单的DOM对象
+
+    if(/^\d+\d+\d$/.test(value)){
+      return '用户名不能全为数字';
+    }
+  }
+
+  //我们既支持上述函数式的方式，也支持下述数组的形式
+  //数组的两个值分别代表：[正则匹配、匹配不符时的提示文字]
+  ,IPv4: [/^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/, 'A记录的记录值为IPv4形式（如10.10.10.10）']
+   ,IPv6: [/^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/,'AAAA记录的记录值为IPv6形式（如ff03:0:0:0:0:0:0:c1）']
+    ,CNAME:[/^(([A-Za-z0-9-~]+)\.)+(([A-Za-z0-9-~]+)\.)+([A-Za-z0-9-~\/])+$/,"CNAME记录的记录值为域名形式（如abc.example.com）"],
+    NS:[/^(([A-Za-z0-9-~]+)\.)+(([A-Za-z0-9-~]+)\.)+([A-Za-z0-9-~\/])+$/,"NS记录的记录值为域名形式（如abc.example.com）"],
+     MX:[/^(([A-Za-z0-9-~]+)\.)+(([A-Za-z0-9-~]+)\.)+([A-Za-z0-9-~\/])+$/,"MX记录的记录值为域名形式（如abc.example.com）"],
+
+});
+
+
+  //监听提交
+  form.on('submit(formDemo)', function(data){
+      console.log(data.RecordId)
+     $.ajax({
+                        url: "{% url 'detail_dns_record' %}",
+                        type: "POST",
+                        data:{"csrfmiddlewaretoken":"{{ csrf_token }}","accountName":'{{ accountName }}',
+                            "domainName":'{{ domainName }}',"all_obj":data.field,"RecordId":"{{ record.RecordId }}"},
+                        dataType: "json",
+                        success: function(data){
+
+                }
+
+            });
+  });
+
+
+});
+</script>
+</body>

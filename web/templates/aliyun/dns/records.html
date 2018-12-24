@@ -1,0 +1,173 @@
+{% extends 'aliyun/basic/index.html' %}
+
+{% block css %}
+    <style>
+        .layui-form-checkbox[lay-skin=primary] {
+            /* width: 100%; */
+            padding-left: 28px;
+        }
+    </style>
+{% endblock %}
+
+{% block conent %}
+    <div class="x-body layui-anim layui-anim-up" style="overflow-y:scroll;min-height:990px;">
+    {#<blockquote class="layui-elem-quote">注意:为保障访问速度,查询同时请配合时间范围,默认显示一天以内的记录</blockquote>#}
+    <blockquote class="layui-elem-quote"><a href="{% url "get_domain_view" %}">域名管理</a>/{{ domainName }}</blockquote>
+    <fieldset class="layui-elem-field">
+
+{#    <label for="city">可用区</label>#}
+{#    <select id="suppId" style="width: 20%"  class="allRegion">#}
+{#        <option id="-1">请选择</option>#}
+{#        {% for env in allAct %}#}
+{#            <option id="a_id" class="one_act" value="{{ env.accountName }}" name="env_check">{{ env.accountName }}</option>#}
+{#        {% endfor %}#}
+{#            <option id="a_id" class="all_act" value="{{ env.accountName }}" name="env_check">所有可用区</option>#}
+{#    </select>#}
+{##}
+{#    <button id="find_act" class="layui-btn layui-btn-normal" data-type="reload"><i class="layui-icon"></i>查询</button>#}
+{#    <button id="get_ali_ecs" class="layui-btn layui-btn-normal" data-type="reload"><i class="layui-icon"></i>更新阿里云资源</button>#}
+{##}
+{#    <input  type="text" id="select_orderId" name="select_orderId"  placeholder="请输入域名"  class="layui-input-block">#}
+{#  <button class="layui-btn"  id="searchBtn" data-type="getInfo" >搜索</button>#}
+
+    <table class="layui-hide" id="ALI_table_dnsrecords" lay-filter="useruv"></table>
+
+
+
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+
+
+{% endblock %}
+{% block js %}
+{#    <script type="text/html" id="toolbarDemo">#}
+{#  <div class="layui-btn-container">#}
+{#    <button class="layui-btn layui-btn-sm" lay-event="getCheckData">获取选中行数据</button>#}
+{#    <button class="layui-btn layui-btn-sm" lay-event="getCheckLength">获取选中数目</button>#}
+{#    <button class="layui-btn layui-btn-sm" lay-event="isAll">验证是否全选</button>#}
+{#  </div>#}
+{#</script>#}
+
+
+
+
+
+    <script src="/static/plugins/layui/layui.js" charset="utf-8"></script>
+    <script type="text/html" id="dnsRecordbar" >
+      <a class="layui-btn layui-btn-xs" lay-event="edit">修改</a>
+      <a class="layui-btn layui-btn-xs restart"  lay-event="stop">启动/停止</a>
+      <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+        <a class="layui-btn layui-btn-radius layui-btn-xs" lay-event="Remark">备注</a>
+    </script>
+
+    <script>
+        layui.use('table', function(){
+            TABLE_1 = layui.table;
+            TABLE_1.render({
+                autoSort:true,
+                elem: '#ALI_table_dnsrecords',
+                id:"ALI_table_dnsrecords"
+                ,url:'{% url 'get_dns_records' %}'
+                ,method:'post'
+                ,where: {"csrfmiddlewaretoken":"{{ csrf_token }}","accountName":"{{ accountName }}","domainName":"{{ domainName }}","md":"post"}
+                ,toolbar: '#toolbarDemo'
+                ,title: 'dns域名解析表'
+                ,totalRow: true
+                ,height:'full-200',
+                cellMinWidth: 80
+                {#width:1400#}
+                ,defaultToolbar: ['filter', 'print', 'exports']
+                ,cols: [[
+                    {type: 'checkbox', fixed: 'left'},
+                    {field:'Type', title:'记录类型',totalRowText:"记录类型"},
+                    {field:'RR', title:'主机记录', unresize: false, sort: true,width:80,totalRowText:"主机记录"},
+                    {field:'Line', title:'解析路线', unresize: false, sort: true,totalRowText:"解析路线"},
+                    {field:'Value', title:'记录值', unresize: false, sort: true,totalRowText:"记录值"},
+                    {field:'Priority', title:'MX优先级', unresize: false, sort: true,totalRowText:"MX优先级"},
+                    {field:'TTL', title:'TTL', unresize: false, sort: true,totalRowText:"TTL"},
+                    {field:'Status', title:'状态', unresize: false, sort: true,totalRowText:"状态"},
+                    {fixed: 'right', title:'操作', align:'center', toolbar: '#dnsRecordbar', width:200}
+            ]],
+                skin: 'row', //表格风格
+                even: true, //隔行背景
+                page: true, //是否显示分页
+                limits: [5,10,15,20,50,100,200], //显示
+                limit: 50, //每页默认显示的数量
+                request: {
+                    pageName: 'pageStart', //页码的参数名称，默认：page
+                    limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+            });
+            TABLE_1.on('checkbox(useruv)', function(obj){
+            console.log(obj)
+            });
+            TABLE_1.on('tool(useruv)', function(obj){
+                var data = obj.data;
+
+                if(obj.event === 'edit'){
+
+                        layer.open({
+                            type: 2,
+                            title: '修改记录',
+                            closeBtn: 1,
+                            area: ['600px', '600px'],
+                            shadeClose: true, //点击遮罩关闭
+                            content: ['{% url 'detail_dns_record' %}?accountName={{ accountName }}&RR='+
+                            data.RR+"&domainName={{ domainName }}"]
+                                    })
+
+                } else if(obj.event === 'del'){
+                  layer.confirm('真的删除行么', function(index){
+                    $.ajax({
+                        url: "{% url 'stop_dns_record' %}",
+                        type: "POST",
+                        data:{"accountName":"{{ accountName }}","RecordId":data.RecordId,"csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                        if(data.state==1){
+                           //删除这一行
+                            obj.del();
+                           //关闭弹框
+                            layer.close(index);
+                            layer.msg("删除成功", {icon: 6});
+                        }else{
+                            layer.msg("删除失败", {icon: 5});
+                        }
+                }
+
+            });
+                  });
+                } else if(obj.event === 'stop'){
+                    layer.confirm('真的停止么',function () {
+                        var RecordId = data.RecordId;
+                        $.ajax({
+                            url: "{% url 'stop_dns_record' %}",
+                            type: "POST",
+                            data:{"accountName":"{{ accountName }}","RecordId":data.RecordId,"csrfmiddlewaretoken":"{{ csrf_token }}"},
+                            dataType: "json",
+                            success: function(data){
+                                var datan = JSON.stringify(data);
+                                console.log(datan);
+                                if(datan.Status=="ENABLE"){
+                                    {#layer.close(index);#}
+                                    layer.msg("已启动", {icon: 6});
+                                }else{
+                                    layer.msg("已暂停", {icon: 5});
+                                }
+
+                                window.location.reload()
+
+                            }
+                        })
+                    })
+                } else {
+                  layer.alert('编辑行：<br>'+ JSON.stringify(data))
+                }
+        })
+        })
+
+    </script>
+
+
+
+{% endblock %}

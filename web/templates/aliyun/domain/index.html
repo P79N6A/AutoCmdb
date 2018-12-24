@@ -1,0 +1,311 @@
+{% extends 'aliyun/basic/index.html' %}
+
+{% block css %}
+    <style>
+        .layui-form-checkbox[lay-skin=primary] {
+            /* width: 100%; */
+            padding-left: 28px;
+        }
+    </style>
+{% endblock %}
+
+{% block tab_title %}
+    <ul class="layui-tab-title">
+         <li class="home"><i class="layui-icon">&#xe68e;</i>域名管理</li>
+    </ul>
+{% endblock %}
+
+{% block conent %}
+    <div class="x-body layui-anim layui-anim-up" style="overflow-y:scroll;min-height:990px;">
+    {#<blockquote class="layui-elem-quote">注意:为保障访问速度,查询同时请配合时间范围,默认显示一天以内的记录</blockquote>#}
+    <label for="prov">账号</label>
+    <select  name="suppUserId" id="suppUserId" style="width: 20%" class="allAct">
+        <option id="-1" >请选择</option>
+{#        {% for env in n_form.province %}#}
+{#            <option id="-1" class="one_act" value="{{ env.accountName }}" name="env_check">{{ env.accountName }}</option>#}
+{#        {% endfor %}#}
+{#            <option id="a_id" class="all_act" value="{{ env.accountName }}" name="env_check">所有账号</option>#}
+    </select>
+
+{#    <label for="city">可用区</label>#}
+{#    <select id="suppId" style="width: 20%"  class="allRegion">#}
+{#        <option id="-1">请选择</option>#}
+{#        {% for env in allAct %}#}
+{#            <option id="a_id" class="one_act" value="{{ env.accountName }}" name="env_check">{{ env.accountName }}</option>#}
+{#        {% endfor %}#}
+{#            <option id="a_id" class="all_act" value="{{ env.accountName }}" name="env_check">所有可用区</option>#}
+{#    </select>#}
+{##}
+    <button id="find_act" class="layui-btn layui-btn-normal" data-type="reload"><i class="layui-icon"></i>查询</button>
+    <button id="clear_cache" class="layui-btn layui-btn-normal" data-type="reload"><i class="layui-icon"></i>清除缓存</button>
+{#    <button id="get_ali_ecs" class="layui-btn layui-btn-normal" data-type="reload"><i class="layui-icon"></i>更新阿里云资源</button>#}
+
+    <input  type="text" id="select_orderId" name="select_orderId"  placeholder="请输入域名"  class="layui-input-block">
+  <button class="layui-btn"  id="searchBtn" data-type="getInfo" >搜索</button>
+
+
+
+
+    <table class="layui-hide" id="ALI_table_domain" lay-filter="useruv"></table>
+
+
+
+
+
+
+
+
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+
+
+{% endblock %}
+{% block js %}
+{#    <script type="text/html" id="toolbarDemo">#}
+{#  <div class="layui-btn-container">#}
+{#    <button class="layui-btn layui-btn-sm" lay-event="getCheckData">获取选中行数据</button>#}
+{#    <button class="layui-btn layui-btn-sm" lay-event="getCheckLength">获取选中数目</button>#}
+{#    <button class="layui-btn layui-btn-sm" lay-event="isAll">验证是否全选</button>#}
+{#  </div>#}
+{#</script>#}
+
+
+    <script type="text/html" id="dnsRecordbar" >
+      <a class="layui-btn layui-btn-xs" lay-event="see_dns">查看解析</a>
+    </script>
+
+
+    <script src="/static/plugins/layui/layui.js" charset="utf-8"></script>
+    <script>
+        layui.use('table', function(){
+            TABLE_1 = layui.table;
+            TABLE_1.render({
+                autoSort:true,
+                elem: '#ALI_table_domain',
+                id:"ALI_table_domain"
+                ,url:'{% url 'get_seconde_domain' %}'
+                ,method:'post'
+                ,where: {"csrfmiddlewaretoken":"{{ csrf_token }}","accountName":"全部","md":"port"}
+                ,toolbar: '#toolbarDemo'
+                ,title: '阿里云域名资产表'
+                ,totalRow: true
+                ,height:'full-200',
+                cellMinWidth: 80
+                {#width:1400#}
+                ,defaultToolbar: ['filter', 'print', 'exports']
+                ,cols: [[
+                    {type: 'checkbox', fixed: 'left'},
+                    {field:'accountName', title:'账号',totalRowText:"账号"},
+                    {field:'DomainName', title:'域名链接',totalRowText:"域名链接"},
+                    {field:'domainName', title:'域名',totalRowText:"域名"},
+                    {field:'DomainType', title:'域名类型', unresize: false, sort: true,width:80,totalRowText:"域名类型"},
+                    {field:'DomainStatus', title:'域名状态', unresize: false, sort: true,totalRowText:"域名状态"},
+                    {field:'DomainAuditStatus', title:'域名实名认证状态', unresize: false, sort: true,totalRowText:"域名实名认证状态"},
+                    {field:'ExpirationDateStatus', title:'域名过期状态', unresize: false, sort: true,totalRowText:"域名过期状态"},
+                    {field:'RegistrantType', title:'域名注册类型', unresize: false, sort: true,totalRowText:"域名注册类型"},
+                    {field:'ZhRegistrantOrganization', title:'域名持有者', unresize: false, sort: true,totalRowText:"域名持有者"},
+                    {field:'RegistrationDate', title:'注册日期', unresize: false, sort: true,totalRowText:"注册日期"},
+                    {field:'ExpirationDate', title:'到期日期', unresize: false, sort: true,totalRowText:"到期日期"},
+                    {field:'beian_sitename',hide:true, title:'网站名称', unresize: false, sort: true,totalRowText:"网站名称"},
+                    {field:'beian_nowIcp',hide:true, title:'网站备案号', unresize: false, sort: true,totalRowText:"网站备案号"},
+                    {field:'beian_nature',hide:true, title:'主办单位性质', unresize: false, sort: true,totalRowText:"主办单位性质"},
+                    {fixed: 'right', title:'操作', align:'center', toolbar: '#dnsRecordbar', width:200}
+            ]],
+                skin: 'row', //表格风格
+                even: true, //隔行背景
+                page: true, //是否显示分页
+                limits: [5,10,15,20,50,100,200], //显示
+                limit: 50, //每页默认显示的数量
+                request: {
+
+                    pageName: 'pageStart', //页码的参数名称，默认：page
+                    limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+            });
+            TABLE_1.on('checkbox(useruv)', function(obj){
+            console.log(obj)
+            });
+            TABLE_1.on('tool(useruv)', function(obj){
+                var data = obj.data;
+
+                if(obj.event === 'see_dns'){
+                    var url = "{% url 'dns_records' %}"+"?accountName="+data.accountName
+                        +"&domainName="+data.domainName;
+                    console.log(url)
+                    window.location.href = url;
+                    console.log(data.domainName)
+                } else if(obj.event === 'del'){
+                  layer.confirm('真的删除行么', function(index){
+                    $.ajax({
+                        url: "{% url 'delete_ecs' %}",
+                        type: "POST",
+                        data:{"uvid":data.id,"csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                        if(data.state==1){
+                           //删除这一行
+                            obj.del();
+                           //关闭弹框
+                            layer.close(index);
+                            layer.msg("删除成功", {icon: 6});
+                        }else{
+                            layer.msg("删除失败", {icon: 5});
+                        }
+                }
+
+            });
+                  });
+                } else if(obj.event === 'edit'){
+                  layer.alert('编辑行：<br>'+ JSON.stringify(data))
+                }
+        })
+        })
+
+        $('#searchBtn').on('click',function(){
+        var type = $(this).data('type');
+        active[type] ? active[type].call(this) : '';
+     });
+
+        var  active = {
+            getInfo: function () {
+                var orderId=$('#select_orderId').val();
+                if (orderId) {
+                    var index = layer.msg('查询中，请稍候...',{icon: 16,time:false,shade:0});
+                    setTimeout(function(){
+                        TABLE_1.reload('ALI_table_domain', { //表格的id
+                            url:'{% url 'get_seconde_domain' %}',
+                            where: {
+                                'orderId':$.trim(orderId),"md":"get"
+                            },
+                            skin: 'row', //表格风格
+                            even: true, //隔行背景
+                            page: true, //是否显示分页
+                            limits: [5,10,15,20,50,100,200], //显示
+                            limit: 50, //每页默认显示的数量
+
+                        });
+                        layer.close(index);
+                    },800);
+                } else {
+                    layer.msg("请输入域名");
+                }
+            },
+        };
+  //监听回车事件,扫描枪一扫描或者按下回车键就直接执行查询
+        $("#select_orderId").bind("keyup", function (e) {
+            if (e.keyCode == 13) {
+                var type = "getInfo";
+                active[type] ? active[type].call(this) : '';
+            }
+        });
+
+
+
+
+        $("#find_act").click(function () {
+
+            var suppUserId = $("#suppUserId").find("option:selected").text();
+            console.log(suppUserId);
+            TABLE_1.reload("ALI_table_domain", {
+                  url: '{% url 'get_seconde_domain' %}'
+                 ,method:'post'
+                  ,where: {"accountName":suppUserId, "csrfmiddlewaretoken":"{{ csrf_token }}",'orderId':'',"md":"post"} //设定异步数据接口的额外参数
+                  //,height: 300)
+                 ,cols: [[
+                    {type: 'checkbox', fixed: 'left'},
+                    {field:'accountName', title:'账号',totalRowText:"账号"},
+                    {field:'DomainName', title:'域名链接',totalRowText:"域名链接"},
+                    {field:'domainName', title:'域名',totalRowText:"域名"},
+                    {field:'DomainType', title:'域名类型', unresize: false, sort: true,width:80,totalRowText:"域名类型"},
+                    {field:'DomainStatus', title:'域名状态', unresize: false, sort: true,totalRowText:"域名状态"},
+                    {field:'DomainAuditStatus', title:'域名实名认证状态', unresize: false, sort: true,totalRowText:"域名实名认证状态"},
+                    {field:'ExpirationDateStatus', title:'域名过期状态', unresize: false, sort: true,totalRowText:"域名过期状态"},
+                    {field:'RegistrantType', title:'域名注册类型', unresize: false, sort: true,totalRowText:"域名注册类型"},
+                    {field:'ZhRegistrantOrganization', title:'域名持有者', unresize: false, sort: true,totalRowText:"域名持有者"},
+                    {field:'RegistrationDate', title:'注册日期', unresize: false, sort: true,totalRowText:"注册日期"},
+                    {field:'ExpirationDate', title:'到期日期', unresize: false, sort: true,totalRowText:"到期日期"},
+                    {field:'beian_sitename',hide:true, title:'网站名称', unresize: false, sort: true,totalRowText:"网站名称"},
+                    {field:'beian_nowIcp',hide:true, title:'网站备案号', unresize: false, sort: true,totalRowText:"网站备案号"},
+                    {field:'beian_nature',hide:true, title:'主办单位性质', unresize: false, sort: true,totalRowText:"主办单位性质"},
+                    {fixed: 'right', title:'操作', align:'center', toolbar: '#dnsRecordbar', width:200}
+            ]]
+            });
+        })
+
+
+        $("#clear_cache").click(function () {
+            var suppUserId = $("#suppUserId").find("option:selected").text();
+             $.ajax({
+                 url:"{% url 'clear_domain_cache' %}",
+                 type: "POST",
+                 dataType: "json",
+                 data:{
+                 "csrfmiddlewaretoken": "{{ csrf_token }}"
+                 ,"accountName":suppUserId},
+                 success:function (data) {
+                 {#var result = JSON.parse(data);#}
+                     console.log(data)
+                 if(data.code==0){
+                     {#layer.close(index);#}
+                     layer.msg("清除缓存成功", {icon: 6});
+                 }else{
+                     layer.msg("无缓存可清", {icon: 5});
+                 }
+                 }
+             })
+
+        })
+        /*$("#get_ali_ecs").click(function () {
+            var suppUserId = $("#suppUserId").find("option:selected").text();
+            var suppId = $("#suppId").find("option:selected").attr("id");
+            $.ajax({
+             type: "post",
+             {#url: "{% url 'ecs_list_update' %}",#}
+             data: {"suppUserId":suppUserId, "suppId":suppId, "csrfmiddlewaretoken": "{{ csrf_token }}"},
+             success: function(callback){
+                console.log(callback)
+                      }
+         });
+        });*/
+        {#    $.post("{% url 'ecs_list_update' %}",#}
+        {#        {"suppUserId":suppUserId, "suppId":suppId, "csrfmiddlewaretoken": "{{ csrf_token }}"},#}
+        {#        function (data) {#}
+        {#            console.log(data)#}
+                {#var result = JSON.parse(data);#}
+                {#$.each(result, function (code, item) {#}
+                {#    var liNode = $("<option></option>").attr("id", item.RegionId).text(item.RegionName);#}
+                {#    $("#suppId").append(liNode);#}
+        {##}
+        {#    });#}
+
+
+    </script>
+    <script>
+        $(function () {
+            $("#suppId option:gt(0)").remove();
+            /*初始化省份信息*/
+            $.post("{% url 'account_getProv' %}", {
+                "csrfmiddlewaretoken": "{{ csrf_token }}"
+            },function (data) {
+                var result = JSON.parse(data);
+                $.each(result, function (code, item) {
+                    liNode = $("<option></option>").attr("id",item.id).text(item.accountName);
+                    $("#suppUserId").append(liNode);
+                })
+            })
+            $("#suppId option:gt(0)")
+
+        })
+
+
+
+
+
+
+    </script>
+
+    <script>
+
+    </script>
+
+{% endblock %}

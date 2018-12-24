@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	<title>aliyun</title>
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+{#    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />#}
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <link rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.css"/>
+    <link rel="stylesheet" href="/static/plugins/font-awesome/css/font-awesome.css"/>
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/static/plugins/X-admin/css/font.css">
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css"  media="all">
+	<link rel="stylesheet" href="/static/plugins/X-admin/css/xadmin.css">
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script src="/static/plugins/X-admin/lib/layui/layui.js" charset="utf-8"></script>
+{#    <script type="text/javascript" src="/static/plugins/X-admin/js/xadmin.js"></script>#}
+</head>
+<body>
+<form action="" method="post">
+
+    {% csrf_token %}
+    {{ obj.as_p }}
+    <input class="layui-btn" type="submit">
+</form>
+
+<script>
+    $(function () {
+        var option_list = $("#id_parent").children();
+        console.log({{ parent_id }})
+        $("#level").val("{{ level }}")
+        $.each(option_list, function (code, item) {
+            if ($(item).text() == ''){
+                $(item).remove()
+            }else {
+                if ($(item).val() == '{{ parent_id }}'){
+                    $(item).attr("selected",true);
+                }
+            }
+        })
+    })
+</script>
+</body>
+</html>

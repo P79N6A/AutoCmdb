@@ -1,0 +1,237 @@
+{% extends 'rbac/basic/index.html' %}
+{% block rbac_js %}
+    <link rel="stylesheet" href="/static/plugins/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="/static/plugins/formSelects-v4/dist/formSelects-v4.css"/>
+
+
+{% endblock %}
+{% block rbac_body %}
+
+
+    <div class="x-body">
+      <xblock>
+        <button class="layui-btn layui-btn-danger" onclick="delAll()"><i class="layui-icon"></i>批量删除</button>
+        <button class="layui-btn" onclick="x_admin_show('角色授权-添加','{% url 'roleToAuthAdd' %}',w='750',h='500')"><i class="layui-icon"></i>添加</button>
+        <span class="x-right" style="line-height:40px">共有数据：88 条</span>
+      </xblock>
+      <table class="layui-table">
+        <thead>
+          <tr>
+            <th>
+              <div class="layui-unselect header layui-form-checkbox" lay-skin="primary"><i class="layui-icon">&#xe605;</i></div>
+            </th>
+            <th>ID</th>
+            <th>菜单权限</th>
+            <th>请求方法</th>
+              <th>角色<i id="action_tips" class="fa fa-question-circle-o" aria-hidden="true"></i>
+                </th>
+              <th>操作</th>
+        </thead>
+        <tbody>
+            {% for i in role_auth_objs %}
+
+                        {% for z in i.permission2action2role_set.all %}
+                            <tr id="tr_{{ z.id }}">
+                                <td>
+                                  <div class="layui-unselect layui-form-checkbox" lay-skin="primary" data-id='{{ i.id }}'><i class="layui-icon">&#xe605;</i></div>
+                                </td>
+                                <td>{{ z.id }}</td>
+                                <td id="td_menu_{{ z.id }}">
+                                      <div class="layui-form">
+                                        <select name="modules" lay-verify="required" lay-search="">
+                                            {% for p in role_auth_objs %}
+                                                {% if p == i %}
+                                                <option value={{ p }} selected="">{{ p }}</option>
+                                                {% else %}
+                                          <option value={{ p }}>{{ p }}</option>
+                                                {% endif %}
+                                                {% endfor %}
+                                        </select>
+                                      </div>
+                                </td>
+                                <td id="td_method_{{ z.id }}">
+                                        <div class="layui-form">
+                                            {% for action in actions %}
+                                                {%  if action in z.action.all %}
+                                                <input type="checkbox" name="" title="{{ action.caption }} " checked>
+                                                {% else %}
+                                                     <input type="checkbox" name="" title="{{ action.caption }}">
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                <td id="td_role_{{ z.id }}">
+                                    <select name="city" xm-select="selectId{{ z.id }}">
+                                                {% for role in roles %}
+                                                    {%  if role in z.role.all %}
+                                                        <option value={{ role.caption }} selected="selected">{{ role.caption }}</option>
+                                                    {% else %}
+                                                        <option value={{ role.caption }} >{{ role.caption }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="td-manage">
+                                    <a onclick="member_stop(this,'10001')" href="javascript:;"  title="启用"><i class="layui-icon">&#xe601;</i>
+                                    </a>
+                                    <a title="保存"  onclick="member_save(this,{{ z.id }})" href="javascript:;"><i class="layui-icon">&#xe642;</i>
+                                    </a>
+                                    <a title="删除" onclick="member_del(this,{{ z.id }})" href="javascript:;"><i class="layui-icon">&#xe640;</i>
+                                    </a>
+                                </td>
+                            </tr>
+                         {% endfor %}
+            {% endfor %}
+        </tbody>
+      </table>
+        <div id="test1"></div>
+    </div>
+
+    <script>
+        layui.config({
+            base: '/static/plugins/formSelects-v4/src/' //此处路径请自行处理, 可以使用绝对路径
+        }).extend({
+            formSelects: 'formSelects-v4'
+        });
+    </script>
+    <script type="text/javascript">
+        layui.use(['jquery', 'formSelects'], function () {
+            formSelects = layui.formSelects;
+            {% for z in i.permission2action2role_set.all %}
+                formSelects.render('selectId' + z.id);
+            {% endfor %}
+        })
+    </script>
+
+    <script>
+        layui.use("laypage",function () {
+            var laypage = layui.laypage;
+
+              //执行一个laypage实例
+              laypage.render({
+                elem: 'test1' //注意，这里的 test1 是 ID，不用加 # 号
+                ,count: 50 //数据总数，从服务端得到
+              });
+        });
+
+        layui.use('laydate', function(){
+        var laydate = layui.laydate;
+
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#start' //指定元素
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#end' //指定元素
+        });
+      });
+
+
+        layui.use('layer', function(){
+            var layer = layui.layer;
+          layer.tips('增加\tpost\n' +
+              '删除\tdelete\n' +
+              '修改\tedit\n' +
+              '查看列表\tget\n' +
+              '查看详细\tdetail', '#action_tips', {
+              tipsMore: true
+            });
+});
+
+       /*用户-停用*/
+        function member_stop(obj,id){
+          layer.confirm('确认要停用吗？',function(index){
+
+              if($(obj).attr('title')=='启用'){
+
+                //发异步把用户状态进行更改
+                $(obj).attr('title','停用')
+                $(obj).find('i').html('&#xe62f;');
+
+                $(obj).parents("tr").find(".td-status").find('span').addClass('layui-btn-disabled').html('已停用');
+                layer.msg('已停用!',{icon: 5,time:1000});
+
+              }else{
+                $(obj).attr('title','启用')
+                $(obj).find('i').html('&#xe601;');
+
+                $(obj).parents("tr").find(".td-status").find('span').removeClass('layui-btn-disabled').html('已启用');
+                layer.msg('已启用!',{icon: 5,time:1000});
+              }
+
+          });
+      }
+
+      /*用户-删除*/
+        function member_del(obj,zid){
+          layer.confirm('确认要删除吗？',function(index){
+              $.ajax({
+                        url: "{% url 'roleToAuthDel' %}",
+                        type: "POST",
+                        data:{"md":"delete",
+                            "zid":zid,"csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                            $(obj).parents("tr").remove();
+                            layer.msg(data["msg"],{icon:1,time:1000});
+                        },
+                        error:function () {
+                           layer.msg("无此权限",{icon:0,time:1000});
+                  }
+              });
+
+          });
+      }
+
+
+        function member_save(obj,zid){
+            var method_list = new Array();
+            var menu = $("#td_menu_"+zid+" input").val();
+            var role_list = $("#td_role_"+zid+" .xm-input.xm-select").attr("title").split(",")
+            var method_len = $("#td_method_"+zid+" .layui-form-checked").length;
+            if (method_len > 0){
+                $("#td_method_"+zid+" .layui-form-checked").each(function (index,element) {
+                method_list[index] = $(element).children().first().text().replace(/(^\s*)|(\s*$)/g, "");
+            })
+            }
+
+            layer.confirm('确认要保存吗？',function(index){
+                  $.ajax({
+                            url: "{% url 'roleToAuthSave' %}",
+                            type: "POST",
+                            data:{"md":"post",
+                                "zid":zid,
+                                "menu":menu,
+                                "method_list":method_list,
+                                "role_list":role_list,
+                                "csrfmiddlewaretoken":"{{ csrf_token }}"},
+                            dataType: "json",
+                            success: function(data){
+                                layer.msg(data["msg"],{icon:1,time:1000});
+                            },error:function () {
+                                layer.msg("无此权限",{icon:1,time:1000});
+                      }
+
+                  });
+          });
+      }
+
+        function delAll (argument) {
+            var data = tableCheck.getData();
+            layer.confirm('确认要删除吗？'+data,function(index){
+
+                //捉到所有被选中的，发异步进行删除
+                layer.msg('删除成功', {icon: 1});
+                $(".layui-form-checked").not('.header').parents('tr').remove();
+        });
+      }
+    </script>
+{#    <script>var _hmt = _hmt || []; (function() {#}
+{#        var hm = document.createElement("script");#}
+{#        hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";#}
+{#        var s = document.getElementsByTagName("script")[0];#}
+{#        s.parentNode.insertBefore(hm, s);#}
+{#      })();</script>#}
+{% endblock %}

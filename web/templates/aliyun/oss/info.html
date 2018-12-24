@@ -1,0 +1,71 @@
+{% extends 'aliyun/basic/index.html' %}
+
+{% block css %}
+    <style>
+        .layui-form-checkbox[lay-skin=primary] {
+            /* width: 100%; */
+            padding-left: 28px;
+        }
+    </style>
+{% endblock %}
+
+{% block tab_title %}
+          <ul class="layui-tab-title layui-tab-card">
+            <li class="home"><i class="layui-icon">&#xe68e;</i>oss信息</li>
+          </ul>
+{% endblock %}
+
+{% block ul_title %}
+    <ul class="layui-nav left fast-add" lay-filter="">
+          <li class="layui-nav-item">
+                <a >
+                    <i class="iconfont">&#xe723;</i> OSS({{ oss_info.name}})
+                </a>
+          </li>
+        <li class="layui-nav-item">
+            <a id="revert_rds_list" href="{% url 'ali_oss_index' %}?accountName={{ accountName }}">返回实例列表</a>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block conent %}
+    <div class="layui-tab-content" style="margin-top: 30px">
+
+        <div class="layui-colla-item layui-tab-item layui-show" >
+            <blockquote class="layui-elem-quote layui-colla-title">
+                基本信息
+            </blockquote>
+            <div id="basic_info" class="layui-colla-content layui-show">
+                <table class="layui-table">
+                    <tbody>
+                        <tr>
+                            <th>实例名称: <span style="font-weight: bold">{{ oss_info.name }}</span></th>
+                            <td>区域: {{ oss_info.location }}</td></tr>
+                        <tr>
+                            <th>类型: {{ oss_info.storage_class }}</th>
+                            <th>读写权限: {{ oss_info.acl_name }}</th>
+                            <td>创建时间: {{ oss_info.creation_date }}</td></tr>
+                        <tr>
+                            <th>内网地址: {{ oss_info.intranet_endpoint }}</th>
+                            <td>外网地址: {{ oss_info.extranet_endpoint }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+
+{% endblock %}
+{% block js %}
+
+    <script src="/static/plugins/layui/layui.js" charset="utf-8"></script>
+    <script type="text/html" id="vServerGroup">
+        <a href="#vserver_group" class="layui-table-link" target="_blank">d.VServerGroupId</a>
+    </script>
+
+
+
+
+{% endblock %}

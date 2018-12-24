@@ -1,0 +1,392 @@
+{% extends 'aliyun/basic/index.html' %}
+
+{% block css %}
+    <style>
+        .layui-form-checkbox[lay-skin=primary] {
+            /* width: 100%; */
+            padding-left: 28px;
+        }
+    </style>
+{% endblock %}
+{% block tab_title %}
+    <ul class="layui-tab-title">
+          <li class="home"><i class="layui-icon">&#xe68e;</i>RDS管理</li>
+    </ul>
+{% endblock %}
+{% block conent %}
+    <div class="x-body layui-anim layui-anim-up" style="overflow-y:scroll;min-height:990px;">
+    {#<blockquote class="layui-elem-quote">注意:为保障访问速度,查询同时请配合时间范围,默认显示一天以内的记录</blockquote>#}
+    <label for="prov">账号</label>
+    <select  name="suppUserId" id="suppUserId" style="width: 20%" class="allAct">
+        <option id="-1" >请选择</option>
+{#        {% for env in n_form.province %}#}
+{#            <option id="-1" class="one_act" value="{{ env.accountName }}" name="env_check">{{ env.accountName }}</option>#}
+{#        {% endfor %}#}
+{#            <option id="a_id" class="all_act" value="{{ env.accountName }}" name="env_check">所有账号</option>#}
+    </select>
+    <label for="city">可用区</label>
+    <select id="suppId" style="width: 20%"  class="allRegion">
+        <option id="-1">请选择</option>
+{#        {% for env in allAct %}#}
+{#            <option id="a_id" class="one_act" value="{{ env.accountName }}" name="env_check">{{ env.accountName }}</option>#}
+{#        {% endfor %}#}
+{#            <option id="a_id" class="all_act" value="{{ env.accountName }}" name="env_check">所有可用区</option>#}
+    </select>
+
+    <button id="find_act" class="layui-btn layui-btn-normal" data-type="reload"><i class="layui-icon"></i>查询</button>
+    <button id="get_ali_ecs" class="layui-btn layui-btn-normal" data-type="reload"><i class="layui-icon"></i>更新阿里云资源</button>
+
+    <table class="layui-hide" id="ALI_table_es" lay-filter="useruv"></table>
+
+
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+{% endblock %}
+{% block js %}
+{#    <script type="text/html" id="toolbarDemo">#}
+{#  <div class="layui-btn-container">#}
+{#    <button class="layui-btn layui-btn-sm" lay-event="getCheckData">获取选中行数据</button>#}
+{#    <button class="layui-btn layui-btn-sm" lay-event="getCheckLength">获取选中数目</button>#}
+{#    <button class="layui-btn layui-btn-sm" lay-event="isAll">验证是否全选</button>#}
+{#  </div>#}
+{#</script>#}
+    <script>
+
+    </script>
+
+    <script type="text/html" id="titleTpl">
+
+
+        <a  class="layui-table-link">{{ d.CreateTime }}</a>
+
+    </script>
+
+    <script type="text/html" id="barDemo" >
+      <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+      <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+      <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+    <script src="/static/plugins/layui/layui.js" charset="utf-8"></script>
+    <script>
+        layui.use('table', function(){
+            TABLE = layui.table;
+
+            TABLE.render({
+                autoSort:true,
+                elem: '#ALI_table_es',
+                id:"kk_kk"
+                ,url:'{% url 'rds_list' %}'
+                ,method:'post'
+                ,where: {"csrfmiddlewaretoken":"{{ csrf_token }}","me":"port","suppUserId":'{{ accountName }}', "suppId":'{{ RegionId }}'}
+                ,toolbar: '#toolbarDemo'
+                ,title: '阿里云RDS资产表'
+                ,totalRow: true
+                ,height:'full-200',
+                cellMinWidth: 80
+                {#width:1400#}
+                ,defaultToolbar: ['filter', 'print', 'exports']
+                ,cols: [[
+                    {type: 'checkbox', fixed: 'left'}
+                    ,
+                    {field:'accountName', title:'所属账号', sort: true,totalRowText:"所属账号"},
+                    {field:'DBInstanceId', title:'实例名称', sort: true,totalRowText:"实例名称"},
+                    {field:'DBInstanceStatus', title:'运行状态', unresize: false, sort: true,totalRowText:"运行状态"},
+                    {field:'CreateTime', title:'创建时间', unresize: false, sort: true,totalRowText:"创建时间"},
+                    {field:'ExpireTime', title:'到期时间', unresize: false, sort: true,totalRowText:"到期时间"},
+                    {field:'EngineT', title:'数据库类型', unresize: false, sort: true,totalRowText:"数据库类型" },
+                    {field:'ZoneId', title:'所在可用区', unresize: false, sort: true,totalRowText:"所在可用区" },
+                    {field:'InstanceNetworkType', title:'网络类型', unresize: false, sort: true,totalRowText:"网络类型" },
+                    {field:'VpcId', title:'vpc',hide:true, unresize: false, sort: true,totalRowText:"vpc"},
+                    {field:'ConnectionMode', hide:true,title:'实例访问模式',unresize: false, sort: true,totalRowText:"实例访问模式"},
+                    {field:'pay_type', title:'付费类型', fixed: 'right', unresize: false, sort: true,totalRowText:"付费类型"},
+
+
+            ]],
+                skin: 'row', //表格风格
+                even: true, //隔行背景
+                page: true, //是否显示分页
+                limits: [5,10,15,20,50,100,200], //显示
+                limit: 30, //每页默认显示的数量
+                request: {
+                    pageName: 'pageStart', //页码的参数名称，默认：page
+                    limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+            });
+
+            TABLE.on('row(useruv)', function(obj){
+                var data = obj.data;
+                console.log(data)
+                window.location.replace("{% url 'rds_info' %}?accountName="+data.accountName+"&RegionId="+
+                    data.RegionId+"&DBInstanceId="+data.DBInstanceId+"&md=get");
+                {#//标注选中样式#}
+                {#obj.tr.addClass('layui-table-click').siblings().removeClass('layui-table-click');#}
+              });
+            TABLE.on('checkbox(useruv)', function(obj){
+            console.log(obj)
+            });
+            TABLE.on('tool(useruv)', function(obj){
+                var data = obj.data;
+                if(obj.event === 'detail'){
+                    $.ajax({
+                        url: "{% url 'api_ecs_info' %}",
+                        type: "POST",
+                        data:{"uvid":data.id,"csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                           layer.open({
+                            type: 2,
+                            shade: false,
+                            area: '500px',
+                            maxmin: true,
+                            content: "{% url 'ecs_info' %}/"+data.id,
+                            zIndex: layer.zIndex, //重点1
+                            success: function(layero){
+                                layer.setTop(layero); //重点2
+                                      }
+                                    });}
+                    })
+                } else if(obj.event === 'del'){
+                  layer.confirm('真的删除行么', function(index){
+                    $.ajax({
+                        url: "{% url 'delete_ecs' %}",
+                        type: "POST",
+                        data:{"uvid":data.id,"csrfmiddlewaretoken":"{{ csrf_token }}"},
+                        dataType: "json",
+                        success: function(data){
+                        if(data.state==1){
+                           //删除这一行
+                            obj.del();
+                           //关闭弹框
+                            layer.close(index);
+                            layer.msg("删除成功", {icon: 6});
+                        }else{
+                            layer.msg("删除失败", {icon: 5});
+                        }
+                }
+
+            });
+                  });
+                } else if(obj.event === 'edit'){
+                  layer.alert('编辑行：<br>'+ JSON.stringify(data))
+                }
+        })
+        })
+
+
+
+
+
+
+        $("#find_act").click(function () {
+
+            var suppUserId = $("#suppUserId").find("option:selected").text();
+            var suppId = $("#suppId").find("option:selected").attr("id");
+            TABLE.reload("kk_kk", {
+                  url: '{% url 'rds_list' %}'
+                 ,method:'post'
+                  ,where: {"suppUserId":suppUserId, "suppId":suppId,"csrfmiddlewaretoken":"{{ csrf_token }}"} //设定异步数据接口的额外参数
+                  //,height: 300)
+                 ,cols: [[
+                    {type: 'checkbox', fixed: 'left'}
+                    ,
+                    {field:'accountName', title:'所属账号', sort: true,totalRowText:"所属账号"},
+                    {field:'DBInstanceId', title:'实例名称', sort: true,totalRowText:"实例名称"},
+                    {field:'DBInstanceStatus', title:'运行状态', unresize: false, sort: true,totalRowText:"运行状态"},
+                    {field:'CreateTime', title:'创建时间', unresize: false, sort: true,totalRowText:"创建时间"},
+                    {field:'ExpireTime', title:'到期时间', unresize: false, sort: true,totalRowText:"到期时间"},
+                    {field:'EngineT', title:'数据库类型', unresize: false, sort: true,totalRowText:"数据库类型" },
+                    {field:'ZoneId', title:'所在可用区', unresize: false, sort: true,totalRowText:"所在可用区" },
+                    {field:'InstanceNetworkType', title:'网络类型', unresize: false, sort: true,totalRowText:"网络类型" },
+                    {field:'VpcId', title:'vpc',hide:true, unresize: false, sort: true,totalRowText:"vpc"},
+                    {field:'ConnectionMode', hide:true,title:'实例访问模式',unresize: false, sort: true,totalRowText:"实例访问模式"},
+                    {field:'pay_type', title:'付费类型', fixed: 'right', unresize: false, sort: true,totalRowText:"付费类型"},
+            ]]
+            });
+        })
+
+        $("#get_ali_ecs").click(function () {
+            var suppUserId = $("#suppUserId").find("option:selected").text();
+            var suppId = $("#suppId").find("option:selected").attr("id");
+            $.ajax({
+             type: "post",
+             url: "{% url 'ecs_list_update' %}",
+             data: {"suppUserId":suppUserId, "suppId":suppId, "csrfmiddlewaretoken": "{{ csrf_token }}"},
+             success: function(callback){
+                console.log(callback)
+                      }
+         });
+        });
+        {#    $.post("{% url 'ecs_list_update' %}",#}
+        {#        {"suppUserId":suppUserId, "suppId":suppId, "csrfmiddlewaretoken": "{{ csrf_token }}"},#}
+        {#        function (data) {#}
+        {#            console.log(data)#}
+                {#var result = JSON.parse(data);#}
+                {#$.each(result, function (code, item) {#}
+                {#    var liNode = $("<option></option>").attr("id", item.RegionId).text(item.RegionName);#}
+                {#    $("#suppId").append(liNode);#}
+        {##}
+        {#    });#}
+
+
+    </script>
+    <script>
+         $(function () {
+
+            $("#suppId option:gt(0)").remove();
+            var suppUserId = "{{ accountName }}";
+            /*初始化省份信息*/
+            $.post("{% url 'account_getProv' %}", {
+                "csrfmiddlewaretoken": "{{ csrf_token }}"
+            },function (data) {
+                var result = JSON.parse(data);
+                $.each(result, function (code, item) {
+                    liNode = $("<option></option>").attr("id",item.id).text(item.accountName);
+
+                    $("#suppUserId").append(liNode);
+                    if (suppUserId == item.accountName){
+                        $("#suppUserId").val(suppUserId);
+                        changeSupp(this)
+                    }
+                })
+            })
+
+
+        });
+
+
+        $("#suppUserId").change(
+            function() {
+                $("#suppId option:gt(0)").remove();
+                var prov_code = $(this).find("option:selected").attr("id");
+                $.post("{% url 'account_getCity' %}",
+                    {"prov_selected": prov_code,
+                    "csrfmiddlewaretoken": "{{ csrf_token }}"}, function (data) {
+                    var result = JSON.parse(data);
+                    $.each(result, function (code, item) {
+                        var liNode = $("<option></option>").attr("id", item.RegionId).text(item.RegionName);
+                        $("#suppId").append(liNode);
+                    })
+                });
+            }
+        );
+
+        function changeSupp(self) {
+                var RegionId = "{{ RegionId }}";
+                $("#suppId option:gt(0)").remove();
+                var prov_code = $(self).attr("id");
+                console.log(prov_code)
+                $.post("{% url 'account_getCity' %}",
+                    {"prov_selected": prov_code,
+                    "csrfmiddlewaretoken": "{{ csrf_token }}"}, function (data) {
+                    var result = JSON.parse(data);
+                    $.each(result, function (code, item) {
+                        var liNode = $("<option></option>").attr("id", item.RegionId).text(item.RegionName);
+                        $("#suppId").append(liNode);
+                        if (RegionId){
+                             $("#suppId").val($("#"+RegionId).text())
+                        }
+
+                    })
+                });
+            }
+
+
+
+
+    </script>
+
+    <script>
+
+    </script>
+{#    <script>#}
+{##}
+{#        function selectSupp(){#}
+{#            var oSel = document.getElementById("suppId");//获取供应商的下拉信息#}
+{#            var oOp = oSel.children; //获取select列表的所有子元素。#}
+{#            var occ  = $(".allRegion option").text();#}
+{#            if (occ == "请选择....." || occ == "所有账号"){#}
+{#                $(".allRegion option").remove()#}
+{#            }#}
+{#            for(var i=0,len = oOp.length;i<len;i++)#}
+{#                {//将供应商的下拉菜单的数据清除#}
+{#                    oSel.removeChild(oOp[i]);  //循环删除所有子元素#}
+{##}
+{#                }#}
+{#            var objS = document.getElementById("suppUserId");//获取配送员的信息#}
+{#            var suppUserId = objS.options[objS.selectedIndex].value;//获取配送员下拉选定的数据#}
+{#             //根据地址和配送员信息发送一个ajax查询，获取相应的配送员信息#}
+{#             $.ajax({#}
+{#                        url: "{% url 'get_act_region' %}",#}
+{#                        type: "post",#}
+{#                        data: {#}
+{#                            csrfmiddlewaretoken: '{{ csrf_token }}',#}
+{#                            act:suppUserId#}
+{#                    },#}
+{#        success : function(callback) {//将查询到的供应商信息放在供应商的select标签框中#}
+{#                            var data = JSON.parse(callback);#}
+{#            console.log(data)#}
+{#            if(data.length!=0){//绑定的供应商显示#}
+{#                $.each(data, function (k,v) {#}
+{#                        console.log(k,v);#}
+{#                        $("#suppId").append("<option value='1'>"+v.RegionName+"</option>");#}
+{##}
+{#                    });#}
+                {#for(var i=0;i<data.length;i++){#}
+                {#    console.log(data);#}
+                {#    $("#suppId").append("<option value = "+data["RegionName"]+">"+data["RegionId"]+"</option>");#}
+{##}
+{#            }else{#}
+                {#document.getElementById("suppUserId").innerHTML#}
+                {#= "<option value = "+""+">"+null+"</option>" ;#}
+{##}
+{#                document.getElementById("suppId").innerHTML#}
+{#                = "<option value = "+""+">"+"请选择...."+"</option>" ;#}
+{#                return;#}
+{#            }#}
+{#        }#}
+{#     });#}
+{##}
+{# }#}
+{##}
+{##}
+{#        function click_region(self){#}
+{##}
+{#            var occ  = $(".allRegion option").text();#}
+{#            var occ_val  = $(".allRegion option").length;#}
+{#            console.log(occ,occ_val);#}
+{#            if (occ == "请选择....." || occ == "所有账号"){#}
+{#                $(".allRegion option").remove()#}
+{#            }#}
+{#            else#}
+{#            if (occ != "请选择....." || occ != "所有账号"){#}
+{#                    var act = $(self).val();#}
+{#                    $.ajax({#}
+{#                        url: "{% url 'get_act_region' %}",#}
+{#                        type: "post",#}
+{#                        data: {#}
+{#                            csrfmiddlewaretoken: '{{ csrf_token }}',#}
+{#                            act:act#}
+{#                    },#}
+{#                success: function (callback) {#}
+{#                    var data = JSON.parse(callback);#}
+{##}
+{#                    $.each(data, function (k,v) {#}
+{##}
+{#                        var $opt = $("<option value='1'>"+v.RegionName+"</option>");#}
+{#                        $opt.appendTo($(".allRegion"));#}
+{#                    });#}
+{##}
+{#                }#}
+{#            });#}
+{#            }else if(occ_val == "请选择....." ){#}
+{#                top.location.reload()#}
+{#            }#}
+{##}
+{##}
+{##}
+{##}
+{#        }#}
+{##}
+{##}
+{#    </script>#}
+{% endblock %}
